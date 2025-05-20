@@ -10,11 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: 🔍 打印调试信息
+      run: |
+        echo "github.ref: ${{ github.ref }}"
+        echo "github.ref_name: ${{ github.ref_name }}"
+        echo "github.event.release.tag_name: ${{ github.event.release.tag_name }}"
+
     - name: 📥 使用 curl 下载 Release 附件
       run: |
         echo "📦 正在下载 GitHub Release 附件..."
 
-        TAG=${{ github.event.release.tag_name }}
+        TAG="${{ github.ref_name }}"
         AUTH_HEADER="Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
         GH_API="https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG"
 
@@ -38,7 +44,7 @@ jobs:
       run: |
         echo "🚀 正在同步 Release 到 Gitee..."
 
-        TAG=${{ github.event.release.tag_name }}
+        TAG="${{ github.ref_name }}"
         GITEE_API="https://gitee.com/api/v5/repos/${{ secrets.GITEE_REPO }}/releases"
 
         # 创建 Gitee Release
