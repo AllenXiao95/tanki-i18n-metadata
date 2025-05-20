@@ -48,15 +48,16 @@ jobs:
 
     - name: 📤 上传到 Gitee Release
       run: |
-        # 1️⃣ 清洗 GITEE_REPO，去除换行和回车
+        # 1️⃣ 清洗 GITEE_REPO，去除所有换行/回车
         RAW_REPO="${{ secrets.GITEE_REPO }}"
         GITEE_REPO_CLEAN="${RAW_REPO//$'\n'/}"
         GITEE_REPO_CLEAN="${GITEE_REPO_CLEAN//$'\r'/}"
 
-        echo "🧪 CLEAN REPO HEX:"
+        echo "🧪 CLEAN REPO (hex):"
         echo -n "$GITEE_REPO_CLEAN" | xxd
-        echo "🧪 CLEAN REPO STR: [$GITEE_REPO_CLEAN]"
+        echo "🧪 CLEAN REPO (str): [$GITEE_REPO_CLEAN]"
 
+        # 2️⃣ 创建 Release
         NAME="Release $LATEST_TAG"
         BODY="同步自 GitHub 的 Release $LATEST_TAG"
         GITEE_API="https://gitee.com/api/v5/repos/$GITEE_REPO_CLEAN/releases"
@@ -71,40 +72,30 @@ jobs:
             \"body\": \"$BODY\",
             \"target_commitish\": \"master\"
           }")
-
         echo "$response"
 
-        # 2️⃣ 只提取第一个 id 字段——Release 的 id
+        # 精确提取 release id
         release_id=$(echo "$response" | jq -r '.id')
         if [ -z "$release_id" ] || [ "$release_id" = "null" ]; then
-          echo "❌ Gitee Release 创建失败或无效 id。"
+          echo "❌ Gitee Release 创建失败，invalid id."
           exit 1
         fi
 
+        # 3️⃣ 上传附件
         echo "📤 开始上传附件..."
         for file in *; do
           [ -f "$file" ] || continue
-          echo "📤 上传 $file ..."
+          echo "📤 上传中: $file"
 
-          # URL encode 文件名
-          ENCODED_FILENAME=$(python3 - <<EOF
-            import urllib.parse, sys
-            print(urllib.parse.quote(sys.argv[1]))
-          EOF
-            "$file"
-          )
+          # URL encode filename
+          ENCODED_FILENAME=$(python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1]))" "$file")
 
+          # 构建并验证 URL
           UPLOAD_URL="https://gitee.com/api/v5/repos/$GITEE_REPO_CLEAN/releases/$release_id/assets"
           echo "🔗 上传地址: $UPLOAD_URL"
+          python3 -c "import sys; from urllib.parse import urlparse; u=urlparse(sys.argv[1]); assert u.scheme and u.netloc and u.path, f'❌ Invalid URL: {sys.argv[1]}'" "$UPLOAD_URL"
 
-          # 3️⃣ 验证 URL 合法性
-          python3 - <<EOF
-            from urllib.parse import urlparse
-            u = urlparse("$UPLOAD_URL")
-            assert u.scheme and u.netloc and u.path, f"❌ 非法 URL: {u.geturl()}"
-          EOF
-
-          # 4️⃣ 执行上传并检查状态码
+          # 执行上传并检查状态码
           http_code=$(curl -w "%{http_code}" -o /tmp/response.json -X POST "$UPLOAD_URL" \
             -H "Content-Type: multipart/form-data" \
             -F "access_token=${{ secrets.GITEE_TOKEN }}" \
@@ -113,10 +104,10 @@ jobs:
 
           echo "🔎 HTTP 状态码: $http_code"
           if [ "$http_code" != "201" ]; then
-            echo "❌ 上传 $file 失败："
+            echo "❌ 上传 $file 失败，响应："
             cat /tmp/response.json
             exit 1
           else
-            echo "✅ 上传成功：$file"
+            echo "✅ 上传成功: $file"
           fi
         done
