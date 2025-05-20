@@ -48,12 +48,12 @@ jobs:
 
     - name: 📤 上传到 Gitee Release
       run: |
-        # 1️⃣ 清洗 secrets 中的 GITEE_REPO，移除尾随换行
-        RAW_REPO="${{ secrets.GITEE_REPO }}"
-        GITEE_REPO_CLEAN=$(echo -n "$RAW_REPO" | tr -d '\n\r')
+        # ✂️ 彻底清洗 repo 名，去除换行、空格、控制符
+        GITEE_REPO_CLEAN=$(echo "${{ secrets.GITEE_REPO }}" | tr -cd '[:alnum:]/_-')
 
-        echo "🧪 可视化清洗后路径："
+        echo "🧪 GITEE_REPO_CLEAN (hex):"
         echo "$GITEE_REPO_CLEAN" | xxd
+        echo "🧪 GITEE_REPO_CLEAN (string): [$GITEE_REPO_CLEAN]"
 
         NAME="Release $LATEST_TAG"
         BODY="同步自 GitHub 的 Release $LATEST_TAG"
@@ -71,6 +71,7 @@ jobs:
           }")
 
         echo "$response"
+
         release_id=$(echo "$response" | grep -o '"id":[0-9]*' | grep -o '[0-9]*')
         if [ -z "$release_id" ]; then
           echo "❌ Gitee Release 创建失败。"
@@ -83,14 +84,12 @@ jobs:
           echo "📤 正在上传 $file 到 Gitee..."
 
           ENCODED_FILENAME=$(python3 -c "import urllib.parse; print(urllib.parse.quote('''$file'''))")
-
-          # 2️⃣ 拼接上传地址
           UPLOAD_URL="https://gitee.com/api/v5/repos/$GITEE_REPO_CLEAN/releases/$release_id/assets"
 
-          echo "🔗 原始上传地址为：$UPLOAD_URL"
+          echo "🔗 拼接上传地址: $UPLOAD_URL"
 
-          # 3️⃣ 使用 Python 判断上传地址是否合法
-          python3 -c "from urllib.parse import urlparse; u=urlparse('$UPLOAD_URL'); assert all([u.scheme, u.netloc, u.path]), '❌ URL 无效'" || exit 2
+          # ✅ 确认上传地址是否合法
+          python3 -c "from urllib.parse import urlparse; u=urlparse('$UPLOAD_URL'); assert all([u.scheme, u.netloc, u.path]), f'❌ URL 非法: {UPLOAD_URL}'"
 
           http_code=$(curl -w "%{http_code}" -o /tmp/response.json -X POST "$UPLOAD_URL" \
             -H "Content-Type: multipart/form-data" \
@@ -108,4 +107,3 @@ jobs:
             echo "✅ 上传成功：$file"
           fi
         done
-
