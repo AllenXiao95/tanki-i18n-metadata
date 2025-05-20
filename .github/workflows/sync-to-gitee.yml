@@ -34,7 +34,7 @@ jobs:
         curl -sSL -H "$AUTH" "$API" > release.json
 
         if ! jq -e '.assets' release.json >/dev/null; then
-          echo "❌ 无法获取附件列表:"  
+          echo "❌ 无法获取附件列表"
           cat release.json
           exit 1
         fi
@@ -47,10 +47,11 @@ jobs:
 
     - name: 📤 上传到 Gitee Release
       run: |
-        # —— 清洗仓库名 —— #
+        # 清洗仓库名
         RAW="${{ secrets.GITEE_REPO }}"
         CLEAN="${RAW//$'\n'/}"; CLEAN="${CLEAN//$'\r'/}"
-        echo "🧪 CLEAN REPO HEX:"; echo -n "$CLEAN"|xxd
+
+        echo "🧪 CLEAN REPO HEX:"; echo -n "$CLEAN" | xxd
         echo "🧪 CLEAN REPO: [$CLEAN]"
 
         NAME="Release $LATEST_TAG"
@@ -69,33 +70,35 @@ jobs:
           }")
         echo "$resp"
 
-        # —— 精准拿顶层 id —— #
         release_id=$(echo "$resp" | jq -r '.id')
         if [ -z "$release_id" ] || [ "$release_id" = "null" ]; then
-          echo "❌ Release 创建失败，id 无效"
+          echo "❌ Release 创建失败或 id 无效"
           exit 1
         fi
 
-        echo "📤 上传附件到 release_id=$release_id"
+        echo "📤 开始上传附件到 release_id=$release_id"
         for file in *; do
           [ -f "$file" ] || continue
           echo "📤 $file"
-          # 文件名编码
-          ef=$(python3 -c "import sys,urllib.parse; print(urllib.parse.quote(sys.argv[1]))" "$file")
-          URL="https://gitee.com/api/v5/repos/$CLEAN/releases/$release_id/assets"
-          echo "🔗 URL: $URL"
-          # URL 验证
-          python3 -c "from urllib.parse import urlparse; u=urlparse(sys.argv[1]); assert u.scheme and u.netloc and u.path" "$URL"
 
-          code=$(curl -w "%{http_code}" -o /tmp/resp.json -X POST "$URL" \
+          ef=$(python3 -c "import sys,urllib.parse; print(urllib.parse.quote(sys.argv[1]))" "$file")
+          UPLOAD_URL="https://gitee.com/api/v5/repos/$CLEAN/releases/$release_id/assets"
+
+          echo "🔗 上传地址: $UPLOAD_URL"
+          python3 -c "import sys; from urllib.parse import urlparse; u=urlparse(sys.argv[1]); assert u.scheme and u.netloc and u.path, f'❌ 非法 URL: {sys.argv[1]}'" "$UPLOAD_URL"
+
+          http_code=$(curl -w "%{http_code}" -o /tmp/resp.json -X POST "$UPLOAD_URL" \
             -H "Content-Type: multipart/form-data" \
             -F "access_token=${{ secrets.GITEE_TOKEN }}" \
             -F "name=$ef" \
             -F "attachment=@$file")
-          echo "🔎 HTTP $code"
-          if [ "$code" != "201" ]; then
-            echo "❌ 上传失败:"; cat /tmp/resp.json; exit 1
+
+          echo "🔎 HTTP 状态码: $http_code"
+          if [ "$http_code" != "201" ]; then
+            echo "❌ 上传 $file 失败，响应："
+            cat /tmp/resp.json
+            exit 1
           else
-            echo "✅ 成功 $file"
+            echo "✅ 上传成功: $file"
           fi
         done
