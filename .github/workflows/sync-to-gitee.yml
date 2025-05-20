@@ -10,29 +10,47 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: ⏱ 获取最新 Git Tag
-      id: get-latest-tag
-      uses: actions-ecosystem/action-get-latest-tag@v1
+    - name: 🔖 获取最新 tag（使用 github-tag-action）
+      id: tag
+      uses: anothrNick/github-tag-action@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        WITH_V: true
+        DRY_RUN: true
 
-    - name: 🔍 打印 Tag
-      run: echo "Latest tag is ${{ steps.get-latest-tag.outputs.tag }}"
+    - name: 🧾 输出 Tag
+      run: echo "Tag is ${{ steps.tag.outputs.new_tag }}"
 
-    - name: 📥 下载所有 Release 附件
-      uses: dsaltares/fetch-gh-release-asset@v1
-      with:
-        repo: ${{ github.repository }}
-        tag: ${{ steps.get-latest-tag.outputs.tag }}
-        file: "*"
-        token: ${{ secrets.GITHUB_TOKEN }}
+    - name: 📦 下载 GitHub Release 附件
+      run: |
+        TAG=${{ steps.tag.outputs.new_tag }}
+        AUTH="Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
+        GH_API="https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG"
+
+        echo "请求：$GH_API"
+        curl -sSL -H "$AUTH" "$GH_API" > release.json
+
+        if ! jq -e '.assets' release.json > /dev/null; then
+          echo "❌ 无法获取 Release 附件信息："
+          cat release.json
+          exit 1
+        fi
+
+        jq -r '.assets[] | "\(.name) \(.url)"' release.json > assets.txt
+
+        while read -r name url; do
+          echo "⬇️ 下载 $name ..."
+          curl -L -H "$AUTH" -H "Accept: application/octet-stream" "$url" -o "$name"
+        done < assets.txt
 
     - name: 📤 上传到 Gitee Release
       run: |
-        TAG=${{ steps.get-latest-tag.outputs.tag }}
+        TAG=${{ steps.tag.outputs.new_tag }}
         NAME="Release $TAG"
         BODY="同步自 GitHub 的 Release $TAG"
         GITEE_API="https://gitee.com/api/v5/repos/${{ secrets.GITEE_REPO }}/releases"
 
-        echo "🚀 正在创建 Gitee Release..."
+        echo "🚀 创建 Gitee Release..."
         response=$(curl -s -X POST "$GITEE_API" \
           -H "Content-Type: application/json" \
           -d '{
