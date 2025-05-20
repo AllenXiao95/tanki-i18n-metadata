@@ -1,4 +1,4 @@
-name: 🚀 Sync GitHub Release to Gitee
+name: 🚀 Sync Release to Gitee
 
 on:
   release:
@@ -8,70 +8,42 @@ on:
 jobs:
   sync-release:
     runs-on: ubuntu-latest
-
     steps:
-    - name: ⏱ 获取最新 Git Tag
-      id: get-latest-tag
-      uses: actions-ecosystem/action-get-latest-tag@v1
+    - name: 🧾 Download Release Assets
+      uses: dsaltares/fetch-gh-release-asset@v1
+      with:
+        repo: ${{ github.repository }}
+        tag: ${{ github.event.release.tag_name }}
+        file: "*"
+        token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: 🔍 打印最新 Tag
-      run: echo "Latest tag is ${{ steps.get-latest-tag.outputs.tag }}"
-
-    - name: 📥 下载 GitHub Release 附件
+    - name: 🗃️ Upload to Gitee
       run: |
-        TAG=${{ steps.get-latest-tag.outputs.tag }}
-        AUTH_HEADER="Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
-        GH_API="https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG"
-
-        echo "📡 请求地址: $GH_API"
-        curl -sSL -H "$AUTH_HEADER" "$GH_API" > release.json
-
-        if ! jq -e '.assets' release.json > /dev/null; then
-          echo "❌ 无法获取 Release 附件信息，响应如下："
-          cat release.json
-          exit 1
-        fi
-
-        jq -r '.assets[] | "\(.name) \(.url)"' release.json > assets.txt
-
-        while read -r name url; do
-          echo "⬇️ 下载 $name ..."
-          curl -L -H "$AUTH_HEADER" -H "Accept: application/octet-stream" "$url" -o "$name"
-        done < assets.txt
-
-    - name: 📤 上传到 Gitee Release
-      run: |
-        TAG=${{ steps.get-latest-tag.outputs.tag }}
-        NAME="Release $TAG"
-        BODY="同步自 GitHub 的 Release $TAG"
-
+        echo "Sync release on Gitee..."
         GITEE_API="https://gitee.com/api/v5/repos/${{ secrets.GITEE_REPO }}/releases"
-
-        echo "🚀 创建 Gitee Release..."
+        
+        # 创建 Gitee release
         response=$(curl -s -X POST "$GITEE_API" \
           -H "Content-Type: application/json" \
           -d '{
-            "access_token": "'${{ secrets.GITEE_TOKEN }}'",
-            "tag_name": "'$TAG'",
-            "name": "'$NAME'",
-            "body": "'$BODY'"
+            "access_token": "${{ secrets.GITEE_TOKEN }}",
+            "tag_name": "${{ github.event.release.tag_name }}",
+            "name": "${{ github.event.release.name }}",
+            "body": "${{ github.event.release.body }}"
           }')
 
         echo "$response"
+
+        # 提取 Gitee release ID
         release_id=$(echo "$response" | grep -o '"id":[0-9]*' | grep -o '[0-9]*')
 
-        if [ -z "$release_id" ]; then
-          echo "❌ Gitee Release 创建失败。"
-          exit 1
-        fi
-
-        echo "📤 开始上传附件..."
-        for file in *; do
-          [ -f "$file" ] || continue
-          echo "📤 正在上传 $file 到 Gitee..."
-          curl -s -X POST "https://gitee.com/api/v5/repos/${{ secrets.GITEE_REPO }}/releases/$release_id/assets" \
+        echo "Uploading assets..."
+        for asset in *; do
+          [ -f "$asset" ] || continue
+          echo "Uploading $asset..."
+          curl -X POST "https://gitee.com/api/v5/repos/${{ secrets.GITEE_REPO }}/releases/$release_id/assets" \
             -H "Content-Type: multipart/form-data" \
             -F "access_token=${{ secrets.GITEE_TOKEN }}" \
-            -F "name=$file" \
-            -F "attachment=@$file"
+            -F "name=$asset" \
+            -F "attachment=@$asset"
         done
