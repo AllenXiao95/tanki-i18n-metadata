@@ -48,15 +48,14 @@ jobs:
 
     - name: 📤 上传到 Gitee Release
       run: |
-        # 1️⃣ 读取并彻底清洗 secrets.GITEE_REPO
+        # 清洗 secrets.GITEE_REPO，去掉所有换行和回车
         RAW_REPO="${{ secrets.GITEE_REPO }}"
-        # Bash 参数替换：删除所有换行与回车
         GITEE_REPO_CLEAN="${RAW_REPO//$'\n'/}"
         GITEE_REPO_CLEAN="${GITEE_REPO_CLEAN//$'\r'/}"
-        # 可视化确认（hex 格式，无末尾 0a）
-        echo "🧪 CLEAN REPO HEX:"
+
+        echo "🧪 CLEAN REPO (hex):"
         echo -n "$GITEE_REPO_CLEAN" | xxd
-        echo "🧪 CLEAN REPO STRING: [$GITEE_REPO_CLEAN]"
+        echo "🧪 CLEAN REPO (str): [$GITEE_REPO_CLEAN]"
 
         NAME="Release $LATEST_TAG"
         BODY="同步自 GitHub 的 Release $LATEST_TAG"
@@ -83,25 +82,16 @@ jobs:
         echo "📤 开始上传附件..."
         for file in *; do
           [ -f "$file" ] || continue
-          echo "📤 正在上传 $file 到 Gitee..."
+          echo "📤 正在上传 $file ..."
 
-          # URL encode filename
-          ENCODED_FILENAME=$(python3 - << 'EOF'
-import urllib.parse, sys
-print(urllib.parse.quote(sys.argv[1]))
-EOF
-            "$file"
-          )
+          # URL encode 文件名
+          ENCODED_FILENAME=$(python3 -c "import sys,urllib.parse; print(urllib.parse.quote(sys.argv[1]))" "$file")
 
           UPLOAD_URL="https://gitee.com/api/v5/repos/$GITEE_REPO_CLEAN/releases/$release_id/assets"
           echo "🔗 上传地址: $UPLOAD_URL"
 
           # 验证 URL 合法性
-          python3 - << EOF
-from urllib.parse import urlparse
-u = urlparse("$UPLOAD_URL")
-assert all([u.scheme, u.netloc, u.path]), f"❌ 非法 URL: {u.geturl()}"
-EOF
+          python3 -c "import sys; from urllib.parse import urlparse; u=urlparse(sys.argv[1]); assert u.scheme and u.netloc and u.path, f'❌ 非法 URL: {sys.argv[1]}'" "$UPLOAD_URL"
 
           # 上传并检测状态码
           http_code=$(curl -w "%{http_code}" -o /tmp/response.json -X POST "$UPLOAD_URL" \
