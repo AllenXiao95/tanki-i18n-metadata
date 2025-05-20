@@ -10,34 +10,43 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 🔑 设置环境变量
-      run: |
-        echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
-        echo "TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
-        echo "RELEASE_ID=${{ github.event.release.id }}" >> $GITHUB_ENV
-
     - name: 📥 使用 curl 下载 Release 附件
       run: |
-        echo "下载 Release 附件..."
-        GH_API="https://api.github.com/repos/${REPO}/releases/${RELEASE_ID}"
+        echo "📦 正在下载 GitHub Release 附件..."
+
+        TAG=${{ github.event.release.tag_name }}
         AUTH_HEADER="Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
-        curl -sSL -H "$AUTH_HEADER" "$GH_API" | jq -r '.assets[] | "\(.name) \(.url)"' > assets.txt
+        GH_API="https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG"
+
+        echo "📡 请求地址: $GH_API"
+        curl -sSL -H "$AUTH_HEADER" "$GH_API" > release.json
+
+        if ! jq -e '.assets' release.json > /dev/null; then
+          echo "❌ 无法获取 Release 附件信息，响应如下："
+          cat release.json
+          exit 1
+        fi
+
+        jq -r '.assets[] | "\(.name) \(.url)"' release.json > assets.txt
 
         while read -r name url; do
-          echo "Downloading: $name"
+          echo "⬇️ 下载 $name ..."
           curl -L -H "$AUTH_HEADER" -H "Accept: application/octet-stream" "$url" -o "$name"
         done < assets.txt
 
     - name: 📤 上传到 Gitee Release
       run: |
-        echo "正在创建 Gitee Release..."
+        echo "🚀 正在同步 Release 到 Gitee..."
+
+        TAG=${{ github.event.release.tag_name }}
         GITEE_API="https://gitee.com/api/v5/repos/${{ secrets.GITEE_REPO }}/releases"
 
+        # 创建 Gitee Release
         response=$(curl -s -X POST "$GITEE_API" \
           -H "Content-Type: application/json" \
           -d '{
             "access_token": "'${{ secrets.GITEE_TOKEN }}'",
-            "tag_name": "'${{ env.TAG }}'",
+            "tag_name": "'$TAG'",
             "name": "'${{ github.event.release.name }}'",
             "body": "'${{ github.event.release.body }}"
           }')
@@ -45,11 +54,16 @@ jobs:
         echo "$response"
         release_id=$(echo "$response" | grep -o '"id":[0-9]*' | grep -o '[0-9]*')
 
-        echo "上传附件到 Gitee..."
+        if [ -z "$release_id" ]; then
+          echo "❌ Gitee Release 创建失败。"
+          exit 1
+        fi
+
+        echo "📤 开始上传附件..."
         for file in *; do
           [ -f "$file" ] || continue
-          echo "Uploading $file..."
-          curl -X POST "https://gitee.com/api/v5/repos/${{ secrets.GITEE_REPO }}/releases/$release_id/assets" \
+          echo "📤 正在上传 $file 到 Gitee..."
+          curl -s -X POST "https://gitee.com/api/v5/repos/${{ secrets.GITEE_REPO }}/releases/$release_id/assets" \
             -H "Content-Type: multipart/form-data" \
             -F "access_token=${{ secrets.GITEE_TOKEN }}" \
             -F "name=$file" \
