@@ -10,25 +10,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: ⬇️ Checkout 仓库代码
+    - name: ⬇️ Checkout 仓库代码（必须拉取 tag）
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
-    - name: 🔖 获取最新 tag（github-tag-action）
-      id: tag
-      uses: anothrNick/github-tag-action@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        WITH_V: true
-        DRY_RUN: true
+    - name: 🔖 获取最新 tag（actions-ecosystem）
+      id: get-tag
+      uses: actions-ecosystem/action-get-latest-tag@v1
 
-    - name: 🧾 打印 tag
-      run: echo "Latest tag is ${{ steps.tag.outputs.new_tag }}"
+    - name: 📌 写入 tag 到环境变量
+      run: echo "LATEST_TAG=${{ steps.get-tag.outputs.tag }}" >> $GITHUB_ENV
 
-    - name: 📥 下载 GitHub Release 附件
+    - name: 🧾 打印最新 tag
+      run: echo "Latest GitHub tag is $LATEST_TAG"
+
+    - name: 📦 下载 GitHub Release 附件
       run: |
-        TAG=${{ steps.tag.outputs.new_tag }}
         AUTH_HEADER="Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
-        GH_API="https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG"
+        GH_API="https://api.github.com/repos/${{ github.repository }}/releases/tags/$LATEST_TAG"
 
         echo "📡 请求地址: $GH_API"
         curl -sSL -H "$AUTH_HEADER" "$GH_API" > release.json
@@ -48,9 +48,8 @@ jobs:
 
     - name: 📤 上传到 Gitee Release
       run: |
-        TAG=${{ steps.tag.outputs.new_tag }}
-        NAME="Release $TAG"
-        BODY="同步自 GitHub 的 Release $TAG"
+        NAME="Release $LATEST_TAG"
+        BODY="同步自 GitHub 的 Release $LATEST_TAG"
         GITEE_API="https://gitee.com/api/v5/repos/${{ secrets.GITEE_REPO }}/releases"
 
         echo "🚀 创建 Gitee Release..."
@@ -58,7 +57,7 @@ jobs:
           -H "Content-Type: application/json" \
           -d '{
             "access_token": "'${{ secrets.GITEE_TOKEN }}'",
-            "tag_name": "'$TAG'",
+            "tag_name": "'$LATEST_TAG'",
             "name": "'$NAME'",
             "body": "'$BODY'"
           }')
