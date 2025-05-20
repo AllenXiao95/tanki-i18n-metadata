@@ -10,17 +10,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 🔍 打印调试信息
-      run: |
-        echo "github.ref: ${{ github.ref }}"
-        echo "github.ref_name: ${{ github.ref_name }}"
-        echo "github.event.release.tag_name: ${{ github.event.release.tag_name }}"
+    - name: ⏱ 获取最新 Git Tag
+      id: get-latest-tag
+      uses: actions-ecosystem/action-get-latest-tag@v1
 
-    - name: 📥 使用 curl 下载 Release 附件
-      run: |
-        echo "📦 正在下载 GitHub Release 附件..."
+    - name: 🔍 打印最新 Tag
+      run: echo "Latest tag is ${{ steps.get-latest-tag.outputs.tag }}"
 
-        TAG="${{ github.ref_name }}"
+    - name: 📥 下载 GitHub Release 附件
+      run: |
+        TAG=${{ steps.get-latest-tag.outputs.tag }}
         AUTH_HEADER="Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
         GH_API="https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG"
 
@@ -42,19 +41,20 @@ jobs:
 
     - name: 📤 上传到 Gitee Release
       run: |
-        echo "🚀 正在同步 Release 到 Gitee..."
+        TAG=${{ steps.get-latest-tag.outputs.tag }}
+        NAME="Release $TAG"
+        BODY="同步自 GitHub 的 Release $TAG"
 
-        TAG="${{ github.ref_name }}"
         GITEE_API="https://gitee.com/api/v5/repos/${{ secrets.GITEE_REPO }}/releases"
 
-        # 创建 Gitee Release
+        echo "🚀 创建 Gitee Release..."
         response=$(curl -s -X POST "$GITEE_API" \
           -H "Content-Type: application/json" \
           -d '{
             "access_token": "'${{ secrets.GITEE_TOKEN }}'",
             "tag_name": "'$TAG'",
-            "name": "'${{ github.event.release.name }}'",
-            "body": "'${{ github.event.release.body }}"
+            "name": "'$NAME'",
+            "body": "'$BODY'"
           }')
 
         echo "$response"
