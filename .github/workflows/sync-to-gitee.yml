@@ -1,4 +1,4 @@
-name: 🚀 Sync Release to Gitee
+name: 🚀 Sync GitHub Release to Gitee
 
 on:
   release:
@@ -8,39 +8,43 @@ on:
 jobs:
   sync-release:
     runs-on: ubuntu-latest
-    steps:
-    - name: 🧾 Download Release Assets
-      uses: dsaltares/fetch-gh-release-asset@v1
-      with:
-        repo: ${{ github.repository }}
-        tag: ${{ github.event.release.tag_name }}
-        file: "*"
-        token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: 🗃️ Upload to Gitee
+    steps:
+    - name: 🧰 安装 GitHub CLI
+      uses: cli/cli-action@v2
+
+    - name: 🔐 登录 GitHub CLI
+      run: gh auth setup-git
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 📥 下载 Release 附件
       run: |
-        echo "Sync release on Gitee..."
+        echo "Release tag: ${{ github.event.release.tag_name }}"
+        gh release download "${{ github.event.release.tag_name }}" --repo ${{ github.repository }}
+
+    - name: 📤 上传到 Gitee Release
+      run: |
+        echo "正在同步 Release 到 Gitee..."
         GITEE_API="https://gitee.com/api/v5/repos/${{ secrets.GITEE_REPO }}/releases"
-        
-        # 创建 Gitee release
+
+        # 创建 Release
         response=$(curl -s -X POST "$GITEE_API" \
           -H "Content-Type: application/json" \
           -d '{
-            "access_token": "${{ secrets.GITEE_TOKEN }}",
-            "tag_name": "${{ github.event.release.tag_name }}",
-            "name": "${{ github.event.release.name }}",
-            "body": "${{ github.event.release.body }}"
+            "access_token": "'${{ secrets.GITEE_TOKEN }}'",
+            "tag_name": "'${{ github.event.release.tag_name }}'",
+            "name": "'${{ github.event.release.name }}'",
+            "body": "'${{ github.event.release.body }}"
           }')
 
         echo "$response"
-
-        # 提取 Gitee release ID
         release_id=$(echo "$response" | grep -o '"id":[0-9]*' | grep -o '[0-9]*')
 
-        echo "Uploading assets..."
+        echo "开始上传附件..."
         for asset in *; do
           [ -f "$asset" ] || continue
-          echo "Uploading $asset..."
+          echo "上传 $asset ..."
           curl -X POST "https://gitee.com/api/v5/repos/${{ secrets.GITEE_REPO }}/releases/$release_id/assets" \
             -H "Content-Type: multipart/form-data" \
             -F "access_token=${{ secrets.GITEE_TOKEN }}" \
