@@ -47,9 +47,10 @@ jobs:
         done < assets.txt
 
     - name: 📤 上传到 Gitee Release
-      env:
-        GITEE_REPO_CLEAN: ${{ secrets.GITEE_REPO }}
       run: |
+        RAW_REPO="${{ secrets.GITEE_REPO }}"
+        GITEE_REPO_CLEAN=$(echo -n "$RAW_REPO" | tr -d '\n\r')
+
         NAME="Release $LATEST_TAG"
         BODY="同步自 GitHub 的 Release $LATEST_TAG"
         GITEE_API="https://gitee.com/api/v5/repos/$GITEE_REPO_CLEAN/releases"
@@ -80,11 +81,8 @@ jobs:
           echo "📤 正在上传 $file 到 Gitee..."
 
           ENCODED_FILENAME=$(python3 -c "import urllib.parse; print(urllib.parse.quote('''$file'''))")
-          CLEAN_REPO=$(echo -n "$GITEE_REPO_CLEAN" | tr -d '\n\r')
-          UPLOAD_URL="https://gitee.com/api/v5/repos/$CLEAN_REPO/releases/$release_id/assets"
+          UPLOAD_URL="https://gitee.com/api/v5/repos/$GITEE_REPO_CLEAN/releases/$release_id/assets"
 
-          echo "🔍 原始 GITEE_REPO: [$GITEE_REPO_CLEAN]"
-          echo "🔍 清洗后路径: [$CLEAN_REPO]"
           echo "🔗 上传地址: $UPLOAD_URL"
           echo "🔖 文件名: $file (urlencoded: $ENCODED_FILENAME)"
 
