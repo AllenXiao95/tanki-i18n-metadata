@@ -10,40 +10,53 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: ⬇️ Checkout (with tags)
+    - name: ⬇️ Checkout code (with tags)
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
-    - name: 🔖 Get latest tag
+    - name: 🔖 Get latest Git tag
       id: get-tag
       uses: actions-ecosystem/action-get-latest-tag@v1
 
-    - name: 📌 Export tag
+    - name: 📌 Export tag to env
       run: echo "LATEST_TAG=${{ steps.get-tag.outputs.tag }}" >> $GITHUB_ENV
 
     - name: 🧾 Show tag
-      run: echo "Tag is $LATEST_TAG"
+      run: echo "Latest tag is $LATEST_TAG"
 
     - name: 📦 Download GitHub Release assets
       run: |
         AUTH="Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
         API="https://api.github.com/repos/${{ github.repository }}/releases/tags/$LATEST_TAG"
+        echo "📡 Requesting $API"
         curl -sSL -H "$AUTH" "$API" > release.json
+
+        if ! jq -e '.assets' release.json >/dev/null; then
+          echo "❌ Failed to fetch assets list"
+          cat release.json
+          exit 1
+        fi
+
         jq -r '.assets[] | "\(.name) \(.url)"' release.json > assets.txt
         while read -r name url; do
+          echo "⬇️ Downloading $name"
           curl -L -H "$AUTH" -H "Accept: application/octet-stream" "$url" -o "$name"
         done < assets.txt
 
-    - name: 📤 Create Gitee Release and upload assets
+    - name: 📤 Create Gitee Release & upload assets
       run: |
-        # clean repo
-        RAW="${{ secrets.GITEE_REPO }}"
-        CLEAN="${RAW//$'\n'/}"; CLEAN="${CLEAN//$'\r'/}"
+        # Clean up any stray newlines in the repo name
+        RAW_REPO="${{ secrets.GITEE_REPO }}"
+        CLEAN_REPO="${RAW_REPO//$'\n'/}"
+        CLEAN_REPO="${CLEAN_REPO//$'\r'/}"
 
-        # create release
-        CREATE_API="https://gitee.com/api/v5/repos/$CLEAN/releases?access_token=${{ secrets.GITEE_TOKEN }}"
-        resp=$(curl -s -X POST "$CREATE_API" \
+        echo "🧪 Using repo: [$CLEAN_REPO]"
+
+        # Create the release
+        CREATE_URL="https://gitee.com/api/v5/repos/$CLEAN_REPO/releases?access_token=${{ secrets.GITEE_TOKEN }}"
+        echo "🚀 Creating Gitee release via $CREATE_URL"
+        resp=$(curl -s -X POST "$CREATE_URL" \
           -H "Content-Type: application/json" \
           -d "{
             \"tag_name\":\"$LATEST_TAG\",
@@ -51,19 +64,34 @@ jobs:
             \"body\":\"同步自 GitHub Release $LATEST_TAG\",
             \"target_commitish\":\"master\"
           }")
-        release_id=$(echo "$resp" | jq -r '.id')
-        [ -n "$release_id" ] && [ "$release_id" != "null" ] || { echo "❌ Failed to create release"; exit 1; }
+        echo "$resp"
 
-        # upload each file
+        release_id=$(echo "$resp" | jq -r '.id')
+        if [ -z "$release_id" ] || [ "$release_id" = "null" ]; then
+          echo "❌ Failed to create Gitee release (invalid id)" >&2
+          exit 1
+        fi
+        echo "✔ Created Gitee release ID: $release_id"
+
+        # Upload each asset
         for file in *; do
           [ -f "$file" ] || continue
+          echo "📤 Uploading $file …"
+
+          # URL-encode the filename
           ef=$(python3 -c "import sys,urllib.parse; print(urllib.parse.quote(sys.argv[1]))" "$file")
-          UPLOAD_URL="https://gitee.com/api/v5/repos/$CLEAN/releases/$release_id/assets?access_token=${{ secrets.GITEE_TOKEN }}"
+
+          UPLOAD_URL="https://gitee.com/api/v5/repos/$CLEAN_REPO/releases/$release_id/attach_files?access_token=${{ secrets.GITEE_TOKEN }}"
+          echo "🔗 POST $UPLOAD_URL"
+
           http_code=$(curl -w "%{http_code}" -o /tmp/resp.json -X POST "$UPLOAD_URL" \
-            -F "name=$ef" \
-            -F "attachment=@$file")
+            -F "attachment=@$file" \
+            -F "name=$ef")
+
           if [ "$http_code" != "201" ]; then
-            echo "❌ Upload $file failed (HTTP $http_code)"; cat /tmp/resp.json; exit 1
+            echo "❌ Upload $file failed (HTTP $http_code)" >&2
+            cat /tmp/resp.json >&2
+            exit 1
           else
             echo "✅ Uploaded $file"
           fi
