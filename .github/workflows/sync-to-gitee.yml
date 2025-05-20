@@ -75,7 +75,7 @@ jobs:
             [ -f "$file" ] || continue
 
             case "$file" in
-              README.md|release.json|assets.txt)
+              readme.md|release.json|assets.txt)
                 echo "⏭️ Skipping $file"
                 continue
                 ;;
