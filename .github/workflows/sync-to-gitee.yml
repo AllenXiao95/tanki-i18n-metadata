@@ -15,11 +15,11 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: 🔖 获取最新 tag（actions-ecosystem）
+    - name: 🔖 获取最新 tag
       id: get-tag
       uses: actions-ecosystem/action-get-latest-tag@v1
 
-    - name: 📌 写入 tag 到环境变量
+    - name: 📌 写入 tag 环境变量
       run: echo "LATEST_TAG=${{ steps.get-tag.outputs.tag }}" >> $GITHUB_ENV
 
     - name: 🧾 打印最新 tag
@@ -27,87 +27,75 @@ jobs:
 
     - name: 📦 下载 GitHub Release 附件
       run: |
-        AUTH_HEADER="Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
-        GH_API="https://api.github.com/repos/${{ github.repository }}/releases/tags/$LATEST_TAG"
+        AUTH="Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
+        API="https://api.github.com/repos/${{ github.repository }}/releases/tags/$LATEST_TAG"
 
-        echo "📡 请求地址: $GH_API"
-        curl -sSL -H "$AUTH_HEADER" "$GH_API" > release.json
+        echo "📡 请求：$API"
+        curl -sSL -H "$AUTH" "$API" > release.json
 
-        if ! jq -e '.assets' release.json > /dev/null; then
-          echo "❌ 无法获取 Release 附件信息："
+        if ! jq -e '.assets' release.json >/dev/null; then
+          echo "❌ 无法获取附件列表:"  
           cat release.json
           exit 1
         fi
 
         jq -r '.assets[] | "\(.name) \(.url)"' release.json > assets.txt
-
         while read -r name url; do
-          echo "⬇️ 下载 $name ..."
-          curl -L -H "$AUTH_HEADER" -H "Accept: application/octet-stream" "$url" -o "$name"
+          echo "⬇️ 下载 $name"
+          curl -L -H "$AUTH" -H "Accept: application/octet-stream" "$url" -o "$name"
         done < assets.txt
 
     - name: 📤 上传到 Gitee Release
       run: |
-        # 1️⃣ 清洗 GITEE_REPO，去除所有换行/回车
-        RAW_REPO="${{ secrets.GITEE_REPO }}"
-        GITEE_REPO_CLEAN="${RAW_REPO//$'\n'/}"
-        GITEE_REPO_CLEAN="${GITEE_REPO_CLEAN//$'\r'/}"
+        # —— 清洗仓库名 —— #
+        RAW="${{ secrets.GITEE_REPO }}"
+        CLEAN="${RAW//$'\n'/}"; CLEAN="${CLEAN//$'\r'/}"
+        echo "🧪 CLEAN REPO HEX:"; echo -n "$CLEAN"|xxd
+        echo "🧪 CLEAN REPO: [$CLEAN]"
 
-        echo "🧪 CLEAN REPO (hex):"
-        echo -n "$GITEE_REPO_CLEAN" | xxd
-        echo "🧪 CLEAN REPO (str): [$GITEE_REPO_CLEAN]"
-
-        # 2️⃣ 创建 Release
         NAME="Release $LATEST_TAG"
-        BODY="同步自 GitHub 的 Release $LATEST_TAG"
-        GITEE_API="https://gitee.com/api/v5/repos/$GITEE_REPO_CLEAN/releases"
+        BODY="同步自 GitHub Release $LATEST_TAG"
+        CREATE_API="https://gitee.com/api/v5/repos/$CLEAN/releases"
 
         echo "🚀 创建 Gitee Release..."
-        response=$(curl -s -X POST "$GITEE_API" \
+        resp=$(curl -s -X POST "$CREATE_API" \
           -H "Content-Type: application/json" \
           -d "{
-            \"access_token\": \"${{ secrets.GITEE_TOKEN }}\",
-            \"tag_name\": \"$LATEST_TAG\",
-            \"name\": \"$NAME\",
-            \"body\": \"$BODY\",
-            \"target_commitish\": \"master\"
+            \"access_token\":\"${{ secrets.GITEE_TOKEN }}\",
+            \"tag_name\":\"$LATEST_TAG\",
+            \"name\":\"$NAME\",
+            \"body\":\"$BODY\",
+            \"target_commitish\":\"master\"
           }")
-        echo "$response"
+        echo "$resp"
 
-        # 精确提取 release id
-        release_id=$(echo "$response" | jq -r '.id')
+        # —— 精准拿顶层 id —— #
+        release_id=$(echo "$resp" | jq -r '.id')
         if [ -z "$release_id" ] || [ "$release_id" = "null" ]; then
-          echo "❌ Gitee Release 创建失败，invalid id."
+          echo "❌ Release 创建失败，id 无效"
           exit 1
         fi
 
-        # 3️⃣ 上传附件
-        echo "📤 开始上传附件..."
+        echo "📤 上传附件到 release_id=$release_id"
         for file in *; do
           [ -f "$file" ] || continue
-          echo "📤 上传中: $file"
+          echo "📤 $file"
+          # 文件名编码
+          ef=$(python3 -c "import sys,urllib.parse; print(urllib.parse.quote(sys.argv[1]))" "$file")
+          URL="https://gitee.com/api/v5/repos/$CLEAN/releases/$release_id/assets"
+          echo "🔗 URL: $URL"
+          # URL 验证
+          python3 -c "from urllib.parse import urlparse; u=urlparse(sys.argv[1]); assert u.scheme and u.netloc and u.path" "$URL"
 
-          # URL encode filename
-          ENCODED_FILENAME=$(python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1]))" "$file")
-
-          # 构建并验证 URL
-          UPLOAD_URL="https://gitee.com/api/v5/repos/$GITEE_REPO_CLEAN/releases/$release_id/assets"
-          echo "🔗 上传地址: $UPLOAD_URL"
-          python3 -c "import sys; from urllib.parse import urlparse; u=urlparse(sys.argv[1]); assert u.scheme and u.netloc and u.path, f'❌ Invalid URL: {sys.argv[1]}'" "$UPLOAD_URL"
-
-          # 执行上传并检查状态码
-          http_code=$(curl -w "%{http_code}" -o /tmp/response.json -X POST "$UPLOAD_URL" \
+          code=$(curl -w "%{http_code}" -o /tmp/resp.json -X POST "$URL" \
             -H "Content-Type: multipart/form-data" \
             -F "access_token=${{ secrets.GITEE_TOKEN }}" \
-            -F "name=$ENCODED_FILENAME" \
+            -F "name=$ef" \
             -F "attachment=@$file")
-
-          echo "🔎 HTTP 状态码: $http_code"
-          if [ "$http_code" != "201" ]; then
-            echo "❌ 上传 $file 失败，响应："
-            cat /tmp/response.json
-            exit 1
+          echo "🔎 HTTP $code"
+          if [ "$code" != "201" ]; then
+            echo "❌ 上传失败:"; cat /tmp/resp.json; exit 1
           else
-            echo "✅ 上传成功: $file"
+            echo "✅ 成功 $file"
           fi
         done
