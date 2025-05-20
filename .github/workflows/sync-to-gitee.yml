@@ -10,7 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 🔖 获取最新 tag（使用 github-tag-action）
+    - name: ⬇️ Checkout 仓库代码
+      uses: actions/checkout@v3
+
+    - name: 🔖 获取最新 tag（github-tag-action）
       id: tag
       uses: anothrNick/github-tag-action@v1
       env:
@@ -18,17 +21,17 @@ jobs:
         WITH_V: true
         DRY_RUN: true
 
-    - name: 🧾 输出 Tag
-      run: echo "Tag is ${{ steps.tag.outputs.new_tag }}"
+    - name: 🧾 打印 tag
+      run: echo "Latest tag is ${{ steps.tag.outputs.new_tag }}"
 
-    - name: 📦 下载 GitHub Release 附件
+    - name: 📥 下载 GitHub Release 附件
       run: |
         TAG=${{ steps.tag.outputs.new_tag }}
-        AUTH="Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
+        AUTH_HEADER="Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
         GH_API="https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG"
 
-        echo "请求：$GH_API"
-        curl -sSL -H "$AUTH" "$GH_API" > release.json
+        echo "📡 请求地址: $GH_API"
+        curl -sSL -H "$AUTH_HEADER" "$GH_API" > release.json
 
         if ! jq -e '.assets' release.json > /dev/null; then
           echo "❌ 无法获取 Release 附件信息："
@@ -40,7 +43,7 @@ jobs:
 
         while read -r name url; do
           echo "⬇️ 下载 $name ..."
-          curl -L -H "$AUTH" -H "Accept: application/octet-stream" "$url" -o "$name"
+          curl -L -H "$AUTH_HEADER" -H "Accept: application/octet-stream" "$url" -o "$name"
         done < assets.txt
 
     - name: 📤 上传到 Gitee Release
