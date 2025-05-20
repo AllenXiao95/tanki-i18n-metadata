@@ -59,7 +59,8 @@ jobs:
             \"access_token\": \"${{ secrets.GITEE_TOKEN }}\",
             \"tag_name\": \"$LATEST_TAG\",
             \"name\": \"$NAME\",
-            \"body\": \"$BODY\"
+            \"body\": \"$BODY\",
+            \"target_commitish\": \"master\"
           }")
 
         echo "$response"
