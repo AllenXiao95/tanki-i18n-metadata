@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: ⬇️ Checkout 仓库代码（必须拉取 tag）
+    - name: ⬇️ Checkout 仓库代码（含 tag）
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
@@ -55,14 +55,15 @@ jobs:
         echo "🚀 创建 Gitee Release..."
         response=$(curl -s -X POST "$GITEE_API" \
           -H "Content-Type: application/json" \
-          -d '{
-            "access_token": "'${{ secrets.GITEE_TOKEN }}'",
-            "tag_name": "'$LATEST_TAG'",
-            "name": "'$NAME'",
-            "body": "'$BODY'"
-          }')
+          -d "{
+            \"access_token\": \"${{ secrets.GITEE_TOKEN }}\",
+            \"tag_name\": \"$LATEST_TAG\",
+            \"name\": \"$NAME\",
+            \"body\": \"$BODY\"
+          }")
 
         echo "$response"
+
         release_id=$(echo "$response" | grep -o '"id":[0-9]*' | grep -o '[0-9]*')
 
         if [ -z "$release_id" ]; then
