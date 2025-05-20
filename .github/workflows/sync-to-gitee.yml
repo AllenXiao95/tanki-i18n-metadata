@@ -53,7 +53,7 @@ jobs:
         GITEE_API="https://gitee.com/api/v5/repos/${{ secrets.GITEE_REPO }}/releases"
 
         echo "🚀 创建 Gitee Release..."
-        response=$(curl -s -X POST "$GITEE_API" \
+        response=$(curl -X POST "$GITEE_API" \
           -H "Content-Type: application/json" \
           -d "{
             \"access_token\": \"${{ secrets.GITEE_TOKEN }}\",
