@@ -78,9 +78,12 @@ jobs:
           echo "📤 正在上传 $file 到 Gitee..."
 
           ENCODED_FILENAME=$(python3 -c "import urllib.parse; print(urllib.parse.quote('''$file'''))")
-          GITEE_REPO_CLEAN=$(echo -n "${{ secrets.GITEE_REPO }}" | tr -d '\n\r')
+          RAW_REPO="${{ secrets.GITEE_REPO }}"
+          GITEE_REPO_CLEAN=$(echo -n "$RAW_REPO" | tr -d '\n\r')
           UPLOAD_URL="https://gitee.com/api/v5/repos/$GITEE_REPO_CLEAN/releases/$release_id/assets"
 
+          echo "🔍 原始 GITEE_REPO: [$RAW_REPO]"
+          echo "🔍 清洗后路径: [$GITEE_REPO_CLEAN]"
           echo "🔗 上传地址: $UPLOAD_URL"
           echo "🔖 文件名: $file (urlencoded: $ENCODED_FILENAME)"
 
