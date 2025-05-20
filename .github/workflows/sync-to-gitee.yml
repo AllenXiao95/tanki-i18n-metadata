@@ -46,13 +46,13 @@ jobs:
 
       - name: 📤 Create Gitee Release & upload assets
         run: |
-          # 1️⃣ 清洗仓库名
-          RAW="${{ secrets.GITEE_REPO }}"
-          CLEAN="${RAW//$'\n'/}"; CLEAN="${CLEAN//$'\r'/}"
-          echo "🧪 Using repo: [$CLEAN]"
+          # 1️⃣ Clean repo name
+          RAW_REPO="${{ secrets.GITEE_REPO }}"
+          CLEAN_REPO="${RAW_REPO//$'\n'/}"; CLEAN_REPO="${CLEAN_REPO//$'\r'/}"
+          echo "🧪 Using repo: [$CLEAN_REPO]"
 
-          # 2️⃣ 创建 Release
-          CREATE_URL="https://gitee.com/api/v5/repos/$CLEAN/releases?access_token=${{ secrets.GITEE_TOKEN }}"
+          # 2️⃣ Create the release
+          CREATE_URL="https://gitee.com/api/v5/repos/$CLEAN_REPO/releases?access_token=${{ secrets.GITEE_TOKEN }}"
           echo "🚀 Creating Gitee release via $CREATE_URL"
           resp=$(curl -s -X POST "$CREATE_URL" \
             -H "Content-Type: application/json" \
@@ -70,12 +70,20 @@ jobs:
           fi
           echo "✅ Created Gitee release ID: $release_id"
 
-          # 3️⃣ 上传附件（使用 attach_files & file 字段）
+          # 3️⃣ Upload each asset, skipping unwanted files
           for file in *; do
             [ -f "$file" ] || continue
-            echo "📤 Uploading $file …"
 
-            UPLOAD_URL="https://gitee.com/api/v5/repos/$CLEAN/releases/$release_id/attach_files?access_token=${{ secrets.GITEE_TOKEN }}"
+            case "$file" in
+              README.md|release.json|assets.txt)
+                echo "⏭️ Skipping $file"
+                continue
+                ;;
+            esac
+
+            echo "📤 Uploading $file …"
+            ef=$(python3 -c "import sys,urllib.parse; print(urllib.parse.quote(sys.argv[1]))" "$file")
+            UPLOAD_URL="https://gitee.com/api/v5/repos/$CLEAN_REPO/releases/$release_id/attach_files?access_token=${{ secrets.GITEE_TOKEN }}"
             echo "🔗 POST $UPLOAD_URL"
 
             http_code=$(curl -w "%{http_code}" -o /tmp/resp.json -X POST "$UPLOAD_URL" \
