@@ -76,21 +76,22 @@ jobs:
         for file in *; do
           [ -f "$file" ] || continue
           echo "📤 正在上传 $file 到 Gitee..."
-
+        
           ENCODED_FILENAME=$(python3 -c "import urllib.parse; print(urllib.parse.quote('''$file'''))")
-          UPLOAD_URL="https://gitee.com/api/v5/repos/${{ secrets.GITEE_REPO }}/releases/$release_id/assets"
-
+          GITEE_REPO_CLEAN=$(echo -n "${{ secrets.GITEE_REPO }}" | tr -d '\n\r')
+          UPLOAD_URL="https://gitee.com/api/v5/repos/$GITEE_REPO_CLEAN/releases/$release_id/assets"
+        
           echo "🔗 上传地址: $UPLOAD_URL"
           echo "🔖 文件名: $file (urlencoded: $ENCODED_FILENAME)"
-
+        
           http_code=$(curl -w "%{http_code}" -o /tmp/response.json -X POST "$UPLOAD_URL" \
             -H "Content-Type: multipart/form-data" \
             -F "access_token=${{ secrets.GITEE_TOKEN }}" \
             -F "name=$ENCODED_FILENAME" \
             -F "attachment=@$file")
-
+        
           echo "🔎 返回状态码: $http_code"
-
+        
           if [ "$http_code" != "201" ]; then
             echo "❌ 上传 $file 失败，响应如下："
             cat /tmp/response.json
