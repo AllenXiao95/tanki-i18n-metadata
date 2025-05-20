@@ -10,95 +10,61 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: ⬇️ Checkout 仓库代码（含 tag）
+    - name: ⬇️ Checkout (with tags)
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
-    - name: 🔖 获取最新 tag
+    - name: 🔖 Get latest tag
       id: get-tag
       uses: actions-ecosystem/action-get-latest-tag@v1
 
-    - name: 📌 写入 tag 环境变量
+    - name: 📌 Export tag
       run: echo "LATEST_TAG=${{ steps.get-tag.outputs.tag }}" >> $GITHUB_ENV
 
-    - name: 🧾 打印最新 tag
-      run: echo "Latest GitHub tag is $LATEST_TAG"
+    - name: 🧾 Show tag
+      run: echo "Tag is $LATEST_TAG"
 
-    - name: 📦 下载 GitHub Release 附件
+    - name: 📦 Download GitHub Release assets
       run: |
         AUTH="Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
         API="https://api.github.com/repos/${{ github.repository }}/releases/tags/$LATEST_TAG"
-
-        echo "📡 请求：$API"
         curl -sSL -H "$AUTH" "$API" > release.json
-
-        if ! jq -e '.assets' release.json >/dev/null; then
-          echo "❌ 无法获取附件列表"
-          cat release.json
-          exit 1
-        fi
-
         jq -r '.assets[] | "\(.name) \(.url)"' release.json > assets.txt
         while read -r name url; do
-          echo "⬇️ 下载 $name"
           curl -L -H "$AUTH" -H "Accept: application/octet-stream" "$url" -o "$name"
         done < assets.txt
 
-    - name: 📤 上传到 Gitee Release
+    - name: 📤 Create Gitee Release and upload assets
       run: |
-        # 清洗仓库名
+        # clean repo
         RAW="${{ secrets.GITEE_REPO }}"
         CLEAN="${RAW//$'\n'/}"; CLEAN="${CLEAN//$'\r'/}"
 
-        echo "🧪 CLEAN REPO HEX:"; echo -n "$CLEAN" | xxd
-        echo "🧪 CLEAN REPO: [$CLEAN]"
-
-        NAME="Release $LATEST_TAG"
-        BODY="同步自 GitHub Release $LATEST_TAG"
-        CREATE_API="https://gitee.com/api/v5/repos/$CLEAN/releases"
-
-        echo "🚀 创建 Gitee Release..."
+        # create release
+        CREATE_API="https://gitee.com/api/v5/repos/$CLEAN/releases?access_token=${{ secrets.GITEE_TOKEN }}"
         resp=$(curl -s -X POST "$CREATE_API" \
           -H "Content-Type: application/json" \
           -d "{
-            \"access_token\":\"${{ secrets.GITEE_TOKEN }}\",
             \"tag_name\":\"$LATEST_TAG\",
-            \"name\":\"$NAME\",
-            \"body\":\"$BODY\",
+            \"name\":\"Release $LATEST_TAG\",
+            \"body\":\"同步自 GitHub Release $LATEST_TAG\",
             \"target_commitish\":\"master\"
           }")
-        echo "$resp"
-
         release_id=$(echo "$resp" | jq -r '.id')
-        if [ -z "$release_id" ] || [ "$release_id" = "null" ]; then
-          echo "❌ Release 创建失败或 id 无效"
-          exit 1
-        fi
+        [ -n "$release_id" ] && [ "$release_id" != "null" ] || { echo "❌ Failed to create release"; exit 1; }
 
-        echo "📤 开始上传附件到 release_id=$release_id"
+        # upload each file
         for file in *; do
           [ -f "$file" ] || continue
-          echo "📤 $file"
-
           ef=$(python3 -c "import sys,urllib.parse; print(urllib.parse.quote(sys.argv[1]))" "$file")
-          UPLOAD_URL="https://gitee.com/api/v5/repos/$CLEAN/releases/$release_id/assets"
-
-          echo "🔗 上传地址: $UPLOAD_URL"
-          python3 -c "import sys; from urllib.parse import urlparse; u=urlparse(sys.argv[1]); assert u.scheme and u.netloc and u.path, f'❌ 非法 URL: {sys.argv[1]}'" "$UPLOAD_URL"
-
+          UPLOAD_URL="https://gitee.com/api/v5/repos/$CLEAN/releases/$release_id/assets?access_token=${{ secrets.GITEE_TOKEN }}"
           http_code=$(curl -w "%{http_code}" -o /tmp/resp.json -X POST "$UPLOAD_URL" \
-            -H "Content-Type: multipart/form-data" \
-            -F "access_token=${{ secrets.GITEE_TOKEN }}" \
             -F "name=$ef" \
             -F "attachment=@$file")
-
-          echo "🔎 HTTP 状态码: $http_code"
           if [ "$http_code" != "201" ]; then
-            echo "❌ 上传 $file 失败，响应："
-            cat /tmp/resp.json
-            exit 1
+            echo "❌ Upload $file failed (HTTP $http_code)"; cat /tmp/resp.json; exit 1
           else
-            echo "✅ 上传成功: $file"
+            echo "✅ Uploaded $file"
           fi
         done
