@@ -15,12 +15,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 🔖 Get latest Git tag
-        id: get-tag
-        uses: actions-ecosystem/action-get-latest-tag@v1
-
-      - name: 📌 Export tag to env
-        run: echo "LATEST_TAG=${{ steps.get-tag.outputs.tag }}" >> $GITHUB_ENV
+      - name: 📌 Export release tag to env
+        run: echo "LATEST_TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
 
       - name: 🧾 Show tag
         run: echo "Latest tag is $LATEST_TAG"
