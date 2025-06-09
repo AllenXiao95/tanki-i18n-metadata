@@ -1,82 +1,207 @@
 <!DOCTYPE html>
 <html lang="zh">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>坦克世界汉化安装器 v2.0</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" href="static/app_icon.ico" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>坦克世界汉化安装器 v2.0</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" href="static/app_icon.ico" />
+  <style>
+    #qq-sidebar::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: -10px;
+      width: 10px;
+      height: 60px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 0 4px 4px 0;
+      transform: translateY(-50%);
+    }
+  </style>
 </head>
+<body class="bg-gray-900 text-white font-sans leading-relaxed tracking-wide relative overflow-x-hidden">
 
-<body class="bg-gray-900 text-white font-sans leading-relaxed tracking-wide">
+  <!-- 顶部 -->
+  <header class="text-center py-10 bg-gradient-to-br from-indigo-800 via-blue-900 to-gray-900 shadow-2xl backdrop-blur-sm">
+    <h1 class="text-4xl font-bold text-white drop-shadow-md">坦克世界汉化安装程序 v2.0</h1>
+    <p class="mt-3 text-gray-300 text-lg">适用于 Lesta(俄服) 服务器，打造纯净汉化体验</p>
+  </header>
 
-    <header class="text-center py-8 bg-gradient-to-r from-blue-700 to-indigo-800 shadow-md">
-        <h1 class="text-3xl font-bold">坦克世界汉化安装程序 v2.0</h1>
-        <p class="mt-2 text-gray-300">适用于Lesta(俄服)服务器，打造纯净汉化体验</p>
-    </header>
+  <main class="max-w-4xl mx-auto p-6 space-y-12">
+    <!-- 功能介绍 -->
+    <section>
+      <h2 class="text-xl font-semibold border-b border-gray-600 pb-2">🛠 功能介绍</h2>
+      <ul class="list-disc list-inside mt-3 text-gray-300 space-y-1">
+        <li>自动识别《坦克世界》目录，简化安装流程</li>
+        <li>DeepSeek-V3 模型加持</li>
+        <li>支持多服版本（RU/正式服、PT/测试服）</li>
+        <li>在线下载汉化补丁</li>
+        <li>完整性校验安装，安全可靠</li>
+        <li>提供卸载与安装后辅助功能</li>
+      </ul>
+    </section>
 
-    <main class="max-w-4xl mx-auto p-6 space-y-12">
-        <!-- 简介 -->
-        <section>
-            <h2 class="text-xl font-semibold border-b border-gray-600 pb-2">🛠 功能介绍</h2>
-            <ul class="list-disc list-inside mt-3 text-gray-300 space-y-1">
-                <li>自动识别《坦克世界》目录，简化安装流程</li>
-                <li>DeekSeek-V3模型加持</li>
-                <li>支持多服版本（RU/正式服、PT/测试服）</li>
-                <li>在线下载汉化补丁</li>
-                <li>完整性校验安装，安全可靠</li>
-                <li>提供卸载与安装后辅助功能</li>
-            </ul>
-        </section>
+    <!-- 下载 -->
+    <section>
+      <h2 class="text-xl font-semibold border-b border-gray-600 pb-2">📥 下载程序</h2>
+      <p class="text-gray-400 mt-2">仅支持 Windows 系统，下载后直接运行，无需安装</p>
+      <div class="grid sm:grid-cols-2 gap-6 mt-4">
+        <a href="https://dl.onlyax.com/坦克世界莱服汉化安装器_signed.exe" download
+           class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 
+           text-white text-center py-3 rounded-md font-semibold shadow-lg transform hover:scale-105 transition-all">
+          Windows 8 / 10 / 11 下载
+        </a>
+        <a href="https://dl.onlyax.com/坦克世界莱服汉化安装器_signed_win7.exe" download
+           class="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 
+           text-white text-center py-3 rounded-md font-semibold shadow-lg transform hover:scale-105 transition-all">
+          Windows 7 下载
+        </a>
+      </div>
+    </section>
 
-        <!-- 下载按钮 -->
-        <section>
-            <h2 class="text-xl font-semibold border-b border-gray-600 pb-2">📥 下载程序</h2>
-            <p class="text-gray-400 mt-2">仅支持 Windows 系统，下载后直接运行，无需安装</p>
-            <div class="grid sm:grid-cols-2 gap-6 mt-4">
-                <a href="https://dl.onlyax.com/%E5%9D%A6%E5%85%8B%E4%B8%96%E7%95%8C%E8%8E%B1%E6%9C%8D%E6%B1%89%E5%8C%96%E5%AE%89%E8%A3%85%E5%99%A8_signed.exe"
-                    download
-                    class="block text-center bg-blue-600 hover:bg-blue-700 py-3 rounded-md font-semibold shadow transition">
-                    Windows 8 / 10 / 11 下载
-                </a>
-                <a href="https://dl.onlyax.com/%E5%9D%A6%E5%85%8B%E4%B8%96%E7%95%8C%E8%8E%B1%E6%9C%8D%E6%B1%89%E5%8C%96%E5%AE%89%E8%A3%85%E5%99%A8_signed_win7.exe"
-                    download
-                    class="block text-center bg-purple-600 hover:bg-purple-700 py-3 rounded-md font-semibold shadow transition">
-                    Windows 7 下载
-                </a>
-            </div>
-        </section>
+    <!-- 教学视频 -->
+    <section>
+      <h2 class="text-xl font-semibold border-b border-gray-600 pb-2">🎥 教学视频</h2>
+      <p class="text-gray-400 mt-2">首次使用？点击下方链接观看完整教学 「感谢老椰子同志的大力支持!」</p>
+      👉<a href="https://b23.tv/RnVJMCh" target="_blank" class="text-blue-400 underline hover:text-blue-200">
+        点此查看教学视频
+      </a>
+    </section>
 
-        <!-- 教学视频 -->
-        <section>
-            <h2 class="text-xl font-semibold border-b border-gray-600 pb-2">🎥 教学视频</h2>
-            <p class="text-gray-400 mt-2">首次使用？点击下方链接观看完整教学 「感谢老椰子同志的大力支持!」</p>
-            👉<a href="https://b23.tv/RnVJMCh" target="_blank" class="text-blue-400 underline hover:text-blue-200">
-                点此查看教学视频
-            </a>
-        </section>
+    <!-- 支持 -->
+    <section>
+      <h2 class="text-xl font-semibold border-b border-gray-600 pb-2">💖 支持作者</h2>
+      <p class="text-gray-400 mt-2">觉得好用？欢迎投喂，支持持续开发！</p>
+      <div class="flex flex-col sm:flex-row justify-center items-center gap-8 mt-4">
+        <div class="text-center">
+          <img src="static/wechat_qr.jpg" alt="微信赞助" class="w-40 rounded-md shadow" />
+          <p class="mt-2 text-sm">微信</p>
+        </div>
+        <div class="text-center">
+          <img src="static/alipay_qr.jpg" alt="支付宝赞助" class="w-40 rounded-md shadow" />
+          <p class="mt-2 text-sm">支付宝</p>
+        </div>
+      </div>
+    </section>
+  </main>
 
-        <!-- 打赏支持 -->
-        <section>
-            <h2 class="text-xl font-semibold border-b border-gray-600 pb-2">💖 支持作者</h2>
-            <p class="text-gray-400 mt-2">觉得好用？欢迎投喂，支持持续开发！</p>
-            <div class="flex flex-col sm:flex-row justify-center items-center gap-8 mt-4">
-                <div class="text-center">
-                    <img src="static/wechat_qr.jpg" alt="微信赞助" class="w-40 rounded-md shadow" />
-                    <p class="mt-2 text-sm">微信</p>
-                </div>
-                <div class="text-center">
-                    <img src="static/alipay_qr.jpg" alt="支付宝赞助" class="w-40 rounded-md shadow" />
-                    <p class="mt-2 text-sm">支付宝</p>
-                </div>
-            </div>
-        </section>
-    </main>
+  <footer class="text-center py-6 text-sm text-gray-500">
+    Designed by @Allen | 汉化项目非商业用途，仅供学习与交流
+  </footer>
 
-    <footer class="text-center py-6 text-sm text-gray-500">
-        Designed by @Allen | 汉化项目非商业用途，仅供学习与交流
-    </footer>
+  <!-- QQ 群按钮 -->
+  <div id="qq-toggle" class="fixed bottom-6 right-6 z-50">
+    <button onclick="toggleSidebar()" 
+            class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 
+            text-white px-4 py-2 rounded-full font-bold shadow-lg transform hover:scale-105 transition-all">
+      🚀 来找组织！
+    </button>
+  </div>
+
+  <!-- QQ 群侧边栏 -->
+  <div id="qq-sidebar"
+       class="fixed top-0 right-0 w-80 h-full bg-gray-900 shadow-lg transform translate-x-full transition-transform duration-500 ease-in-out z-40 p-6 overflow-y-auto touch-pan-y">
+    <h2 class="text-xl font-semibold text-white border-b border-gray-600 pb-2 mb-4">
+      💬 一起加入坦克交流群，获取更新与支持！
+    </h2>
+
+    <!-- 群 1 -->
+    <div class="bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900 border border-gray-600 rounded-lg p-4 mb-4 shadow-md">
+      <p class="text-lg font-semibold text-white mb-2">主群：汉化支持讨论</p>
+      <div class="text-blue-400 cursor-pointer mb-2 copy-btn" data-qq="879991141">
+        QQ 群号：<span class="copy-text">879991141（点击复制）</span>
+      </div>
+      <img src="/static/qrcode_1.png" alt="QQ群二维码1"
+           class="mx-auto w-32 rounded-md shadow cursor-pointer"
+           onclick="showQrModal(this.src)" />
+    </div>
+
+    <!-- 群 2 -->
+    <div class="bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900 border border-gray-600 rounded-lg p-4 shadow-md">
+      <p class="text-lg font-semibold text-white mb-2">备用群：交流群②</p>
+      <div class="text-blue-400 cursor-pointer mb-2 copy-btn" data-qq="123456789">
+        QQ 群号：<span class="copy-text">123456789（点击复制）</span>
+      </div>
+      <img src="/static/qrcode_2.png" alt="QQ群二维码2"
+           class="mx-auto w-32 rounded-md shadow cursor-pointer"
+           onclick="showQrModal(this.src)" />
+    </div>
+  </div>
+
+  <!-- 二维码放大预览模态框 -->
+  <div id="qr-modal"
+       class="fixed inset-0 z-[9999] bg-black bg-opacity-70 hidden items-center justify-center p-4"
+       onclick="hideQrModal()">
+    <img id="qr-modal-img" src="" alt="预览二维码"
+         class="max-w-full max-h-full rounded-lg shadow-lg border-4 border-white"
+         onclick="event.stopPropagation()" />
+    <button onclick="hideQrModal()" class="absolute top-4 right-4 text-white text-2xl font-bold">✖</button>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    function toggleSidebar(show = null) {
+      const sidebar = document.getElementById("qq-sidebar");
+      const isOpen = !sidebar.classList.contains("translate-x-full");
+      if (show === null) {
+        sidebar.classList.toggle("translate-x-full");
+      } else {
+        sidebar.classList.toggle("translate-x-full", !show);
+      }
+    }
+
+    function showQrModal(src) {
+      const modal = document.getElementById('qr-modal');
+      const img = document.getElementById('qr-modal-img');
+      img.src = src;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function hideQrModal() {
+      const modal = document.getElementById('qr-modal');
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // QQ 群号复制
+      document.querySelectorAll(".copy-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const qq = btn.dataset.qq;
+          navigator.clipboard.writeText(qq).then(() => {
+            const textSpan = btn.querySelector(".copy-text");
+            const original = textSpan.textContent;
+            textSpan.textContent = "✅ 已复制";
+            setTimeout(() => {
+              textSpan.textContent = original;
+            }, 2000);
+          });
+        });
+      });
+
+      // 手势关闭 sidebar
+      let startX = null;
+      const sidebar = document.getElementById("qq-sidebar");
+      sidebar.addEventListener("touchstart", e => startX = e.touches[0].clientX);
+      sidebar.addEventListener("touchend", e => {
+        if (startX !== null && e.changedTouches[0].clientX - startX > 80) {
+          toggleSidebar(false);
+          startX = null;
+        }
+      });
+
+      // 点击空白区域关闭 sidebar
+      document.addEventListener("click", (e) => {
+        const toggle = document.getElementById("qq-toggle");
+        const sidebar = document.getElementById("qq-sidebar");
+        const isOpen = !sidebar.classList.contains("translate-x-full");
+        if (!isOpen) return;
+        if (sidebar.contains(e.target) || toggle.contains(e.target)) return;
+        toggleSidebar(false);
+      });
+    });
+  </script>
 </body>
-
 </html>
