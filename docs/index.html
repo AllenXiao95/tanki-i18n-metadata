@@ -93,6 +93,22 @@
         <p class="mt-2 text-sm text-gray-400">通过该链接注册账号，您在游戏中的氪金将给予作者游戏内返金</p>
       </div>
     </section>
+
+    <!-- 更新日志 -->
+    <section id="changelog">
+      <h2 class="text-xl font-semibold border-b border-gray-600 pb-2 mt-12">📝 更新日志</h2>
+      <ul class="mt-4 space-y-2 text-gray-300 text-sm list-disc list-inside">
+        <li><strong>v2.1</strong> - 2025/06/17
+          <ul class="ml-5 list-disc list-inside">
+            <li>界面优化：控件对齐、控件组视觉分区、整体观感升级</li>
+            <li>支持下载进度实时展示（百分比 + 下载速度）</li>
+            <li>程序启动自动检测新版本，提示前往官网更新</li>
+          </ul>
+        </li>
+        <li><strong>v2.0</strong> - 2025/06/11：首次公开发布</li>
+      </ul>
+    </section>
+
   </main>
 
   <footer class="text-center py-6 text-sm text-gray-500">
@@ -100,19 +116,29 @@
   </footer>
 
   <!-- QQ 群按钮 -->
-  <div id="qq-toggle" class="fixed bottom-6 right-6 z-50">
+  <div id="qq-toggle" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 items-end">
+    <!-- 妙妙盒安装 -->
     <a href="https://goover.cn" target="_blank"
-       class="bg-emerald-500 hover:bg-emerald-600
-              text-white text-sm font-semibold py-2 px-4 rounded-full
-              shadow-lg transform hover:scale-105 transition-all">
-      🚀 妙妙盒安装
+       class="w-40 text-center bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700
+              text-white text-sm font-semibold py-2 px-4 rounded-full shadow-lg transform hover:scale-105 transition-all">
+      📦 妙妙盒安装
     </a>
+  
+    <!-- 来找组织 -->
     <button onclick="toggleSidebar()" 
-            class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 
-            text-white px-4 py-2 rounded-full font-bold shadow-lg transform hover:scale-105 transition-all">
+            class="w-40 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700
+                   text-white text-sm font-semibold py-2 px-4 rounded-full shadow-lg transform hover:scale-105 transition-all">
       🚀 来找组织！
     </button>
+  
+    <!-- 返回顶部 -->
+    <button onclick="window.scrollTo({ top: 0, behavior: 'smooth' });"
+            class="w-40 bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900
+                   text-white text-sm font-semibold py-2 px-4 rounded-full shadow-lg transform hover:scale-105 transition-all">
+      ⬆️ 返回顶部
+    </button>
   </div>
+
 
   <!-- QQ 群侧边栏 -->
   <div id="qq-sidebar"
