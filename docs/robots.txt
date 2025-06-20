@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# 指向站点地图
+Sitemap: https://tanki.onlyax.com/sitemap.xml
