@@ -78,7 +78,7 @@
 
 | 微信                                                                                         | 支付宝                                                                                         |
 | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| <img src="https://tanki.onlyax.com/static/wechat_qr.jpg" width="160" alt="微信赞助二维码" /> | <img src="https://tanki.onlyax.com/static/alipay_qr.jpg" width="160" alt="支付宝赞助二维码" /> |
+| <img src="https://tanki.onlyax.com/static/wechat_qr.webp" width="160" alt="微信赞助二维码" /> | <img src="https://tanki.onlyax.com/static/alipay_qr.webp" width="160" alt="支付宝赞助二维码" /> |
 
 或点击加入 [Tanki Lesta 招募计划](https://tanki.su/referral/e4b86462996c4a1d9ba9c8dfd02bfe79) 注册新账号, 你氪金作者可以有返金！
 
