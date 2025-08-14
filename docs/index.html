@@ -126,6 +126,41 @@
   <link rel="apple-touch-icon" href="static/app_icon.ico" />
 </head>
 
+<!-- Cookie 提示条：放置在 body 底部，通过 localStorage 控制显示隐藏。 -->
+<div id="cookie-banner"
+  class="fixed top-0 left-0 right-0 backdrop-blur-sm bg-white/10 border-b border-white/20 text-gray-100 px-4 py-3 z-50 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0"
+  style="display:none;">
+  <span class="text-sm">
+    我们使用 Cookie 提升浏览体验。继续访问即表示您同意我们的
+    <a href="/privacy" class="underline text-blue-400 hover:text-blue-300">隐私政策</a>。
+  </span>
+  <button id="cookie-accept-btn"
+    class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-3 py-1 rounded">
+    同意
+  </button>
+</div>
+
+<script>
+  // Cookie Banner 逻辑：在用户未接受时显示提示条，点击同意后记录状态并隐藏
+  (function () {
+    const banner = document.getElementById('cookie-banner');
+    const acceptBtn = document.getElementById('cookie-accept-btn');
+    try {
+      if (!localStorage.getItem('cookieAccepted')) {
+        banner.style.display = 'flex';
+      }
+      acceptBtn.addEventListener('click', function () {
+        localStorage.setItem('cookieAccepted', 'true');
+        banner.style.display = 'none';
+      });
+    } catch (e) {
+      acceptBtn.addEventListener('click', function () {
+        banner.style.display = 'none';
+      });
+    }
+  })();
+</script>
+
 <body class="bg-gray-900 text-white font-sans leading-relaxed tracking-wide relative overflow-x-hidden">
 
   <!-- █████  顶部  █████ -->
@@ -550,37 +585,7 @@
         });
       });
     });
-  </script>gui
+  </script>
 </body>
-<!-- Cookie 提示条：放置在 body 底部，通过 localStorage 控制显示隐藏。 -->
-<div id="cookie-banner"
-  class="fixed top-0 left-0 right-0 bg-gray-800 text-gray-100 px-4 py-3 z-50 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0"
-  style="display:none;">
-  <span class="text-sm">我们使用 Cookie 提升浏览体验。继续访问即表示您同意我们的 <a href="/privacy"
-      class="underline text-blue-400 hover:text-blue-300">隐私政策</a>。</span>
-  <button id="cookie-accept-btn"
-    class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-3 py-1 rounded">同意</button>
-</div>
-
-<script>
-  // Cookie Banner 逻辑：在用户未接受时显示提示条，点击同意后记录状态并隐藏
-  (function () {
-    const banner = document.getElementById('cookie-banner');
-    const acceptBtn = document.getElementById('cookie-accept-btn');
-    try {
-      if (!localStorage.getItem('cookieAccepted')) {
-        banner.style.display = 'flex';
-      }
-      acceptBtn.addEventListener('click', function () {
-        localStorage.setItem('cookieAccepted', 'true');
-        banner.style.display = 'none';
-      });
-    } catch (e) {
-      acceptBtn.addEventListener('click', function () {
-        banner.style.display = 'none';
-      });
-    }
-  })();
-</script>
 
 </html>
