@@ -152,6 +152,7 @@
       acceptBtn.addEventListener('click', function () {
         localStorage.setItem('cookieAccepted', 'true');
         banner.style.display = 'none';
+        track('cookieAccepted', { action: 'accept' }); // 追踪用户同意 Cookie
       });
     } catch (e) {
       acceptBtn.addEventListener('click', function () {
@@ -503,6 +504,30 @@
       });
     });
 
+    /* 追踪事件 */
+    function track(name, props = {}) {
+      const evt = {
+        name,
+        props,
+        ts: Date.now(),
+        path: location.pathname,
+      };
+
+      const body = JSON.stringify(evt);
+
+      // 优先 sendBeacon，兜底 fetch
+      if (navigator.sendBeacon) {
+        const blob = new Blob([body], { type: "application/json" });
+        navigator.sendBeacon("/track", blob);
+      } else {
+        fetch("/track", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body,
+          keepalive: true
+        });
+      }
+    }
 
     /* 打开二维码模态框 */
     function showQrModal(src) {
