@@ -202,13 +202,16 @@
   </div>
 
   <!-- 广告位：顶部横幅，确保与内容区隔开 -->
-  <!-- <section class="my-8 mx-auto max-w-4xl">
+  <section class="my-8 mx-auto p-6 max-w-4xl">
     <div class="bg-white/5 backdrop-blur-sm rounded-lg shadow-inner p-4 text-center">
       <p class="text-sm text-gray-400 mb-3">广告赞助本项目持续运营</p>
-      <ins class="adsbygoogle" style="display:block; width:100%; height:90px; background-color:rgba(255,255,255,0.05);"
-        aria-label="广告位"></ins>
+      <ins class="adsbygoogle" style="display:block; width:100%; background-color:rgba(255,255,255,0.05);"
+        aria-label="广告位">
+        <img id="ad-banner" src="static/ad_banner.webp" alt="广告位-本地图片"
+          style="width:100%; height:100%; object-fit:cover; border-radius:6px;">
+      </ins>
     </div>
-  </section> -->
+  </section>
 
   <!--
     以下 <main> 容纳页面主体内容。广告位不再采用侧边栏布局，而是作为独立的卡片在内容流中展示，
@@ -502,6 +505,12 @@
           }, 2000);
         });
       });
+    });
+
+    /* 监听广告点击事件，追踪用户行为并跳转 */
+    document.getElementById('ad-banner').addEventListener('click', () => {
+      track('adClick', { source: 'ad_banner' });
+      window.open('https://item.taobao.com/item.htm?ft=t&id=871605997681', '_blank');
     });
 
     /* 追踪事件 */

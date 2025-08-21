@@ -25,7 +25,7 @@ export const onRequestPost: PagesFunction<{ EVENTS_KV: KVNamespace }> = async (c
 
   // key：按天分桶 + 随机
   const day = new Date(now).toISOString().slice(0,10); // YYYY-MM-DD
-  const key = `events:${day}:${crypto.randomUUID()}`;
+  const key = `events:${record.name}:${day}:${crypto.randomUUID()}`;
 
   // 写入 KV，设置 TTL（例如保留 180 天）
   await env.track_event.put(key, JSON.stringify(record), {
