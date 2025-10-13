@@ -9,7 +9,7 @@
   <title>坦克世界俄服汉化安装器 - 一键安装 v1.37 最新版 | 支持 Win7 / Win10 | onlyax</title>
   <meta name="description" content="2025 最新《坦克世界》俄服 (Lesta 版) 汉化安装工具，支持 Win10 / Win7，一键安装、完整中文、安全卸载，最新版本 v1.37。" />
   <meta name="keywords"
-    content="坦克世界俄服汉化, 坦克世界, 坦克世界俄服, World of Tanks, WoT RU, WoT Lesta, 汉化补丁, 中文补丁, 坦克世界 RU 汉化, Lesta 服, RU 服安装器, 坦克世界 RU 服下载, 汉化工具, 坦克世界中文语言包, 坦克世界俄服安装器, WoT RU 汉化教程, WoT RU 一键安装, 坦克世界 RU 服客户端, 坦克世界 RU 中文, worldoftanks 中文, RU 服客户端汉化, WoT RU v1.37 补丁, 坦克世界 RU 支持 Win7, 坦克世界更新后汉化, WoT RU 自动识别目录, world of tanks RU patch, 坦克世界 RU 启动器, world of tanks Lesta, WoT RU 下载慢, WoT 汉化失败, wot 中文安装失败解决, WoT RU 中文修复" />
+    content="坦克世界俄服汉化, 坦克世界, 坦克世界莱服, 坦克世界俄服, World of Tanks, WoT RU, WoT Lesta, 汉化补丁, 中文补丁, 坦克世界 RU 汉化, Lesta 服, RU 服安装器, 坦克世界 RU 服下载, 汉化工具, 坦克世界中文语言包, 坦克世界俄服安装器, WoT RU 汉化教程, WoT RU 一键安装, 坦克世界 RU 服客户端, 坦克世界 RU 中文, Tanki 中文, RU 服客户端汉化, WoT RU v1.37 补丁, 坦克世界 RU 支持 Win7, 坦克世界更新后汉化, WoT RU 自动识别目录, world of tanks RU patch, 坦克世界 RU 启动器, world of tanks Lesta, WoT RU 下载慢, WoT 汉化失败, wot 中文安装失败解决, WoT RU 中文修复" />
 
   <meta name="author" content="Allen.Xiao" />
   <meta name="robots" content="index, follow" />
@@ -55,7 +55,7 @@
             "name": "程序无法识别游戏目录怎么办？",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "请确保您已启动过一次《坦克世界》并安装在默认路径。若仍无法识别，请点击手动选择游戏主目录（通常包含 WorldOfTanks.exe）。"
+              "text": "请确保您已启动过一次《坦克世界》并安装在默认路径。若仍无法识别，请点击手动选择游戏主目录（通常包含 Tanki.exe）。"
             }
           },
           {
@@ -311,7 +311,7 @@
     <section id="changelog">
       <h2 class="text-xl font-semibold border-b border-gray-600 pb-2 mt-12">📝 更新日志</h2>
       <ul class="mt-4 space-y-2 text-gray-300 text-sm list-disc list-inside">
-        <li><strong>v2.3</strong> - 2025/08/31
+        <li><strong>v2.3</strong><span class="new-tag">NEW</span>  - 2025/08/31
           <ul class="ml-5 list-disc list-inside">
             <li>卸载入口迁至安装界面</li>
             <li>优化安装路径选择器</li>
@@ -430,17 +430,18 @@
 
   <!-- ███  QQ 侧边浮动按钮  ███ -->
   <div id="qq-toggle" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 items-end">
-    <button  onclick="openResetModal()" class="btn-toggle bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900
-                   text-white text-sm font-semibold py-2 px-4 rounded-full shadow-lg
-                   transform hover:scale-105 transition-all">
+    <!-- 🧮 重置经验 -->
+    <button onclick="openResetModal()" class="btn-toggle bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700
+              text-white text-sm font-semibold py-2 px-4 rounded-full shadow-lg
+              transform hover:scale-105 transition-all">
       <span class="icon">🧮</span><span class="label">重置经验</span>
     </button>
     <!-- 📦 妙妙盒下载 -->
-    <a href="https://goover.cn" target="_blank" class="btn-toggle bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700
+    <button onclick="openBox()" class="btn-toggle bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700
               text-white text-sm font-semibold py-2 px-4 rounded-full shadow-lg
               transform hover:scale-105 transition-all">
       <span class="icon">📦</span><span class="label">盒子下载</span>
-    </a>
+    </button>
 
     <!-- 🚀 来找组织 -->
     <button onclick="toggleModal(true)" class="btn-toggle bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700
@@ -528,149 +529,7 @@
     </div>
   </div>
 
-  <script>
-    /* 复制 QQ */
-    document.querySelectorAll(".copy-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const qq = btn.dataset.qq;
-        navigator.clipboard.writeText(qq).then(() => {
-          const original = btn.textContent;
-          btn.textContent = "✅ 已复制";
-          setTimeout(() => {
-            btn.textContent = original;
-          }, 2000);
-        });
-      });
-    });
-
-    /* 监听广告点击事件，追踪用户行为并跳转 */
-    document.getElementById('ad-banner').addEventListener('click', () => {
-      track('adClick', { source: 'ad_banner' });
-      window.open('https://item.taobao.com/item.htm?ft=t&id=871605997681', '_blank');
-    });
-
-    /* 追踪事件 */
-    function track(name, props = {}) {
-      const evt = {
-        name,
-        props,
-        ts: Date.now(),
-        path: location.pathname,
-      };
-
-      const body = JSON.stringify(evt);
-
-      // 优先 sendBeacon，兜底 fetch
-      if (navigator.sendBeacon) {
-        const blob = new Blob([body], { type: "application/json" });
-        navigator.sendBeacon("/track", blob);
-      } else {
-        fetch("/track", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body,
-          keepalive: true
-        });
-      }
-    }
-
-    /* 打开二维码模态框 */
-    function showQrModal(src) {
-      const modal = document.getElementById('qr-modal');
-      const img = document.getElementById('qr-modal-img');
-      img.src = src;
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-
-    function toggleModal(show) {
-      const modal = document.getElementById('qq-modal');
-      modal.classList.toggle('hidden', !show);
-      modal.classList.toggle('flex', show);
-    }
-
-    /* 关闭二维码模态框 */
-    function hideQrModal() {
-      const modal = document.getElementById('qr-modal');
-      modal.classList.remove('flex');
-      modal.classList.add('hidden');
-    }
-
-    /* 重置计算器模态框逻辑 */
-    const modal = document.getElementById('reset-modal');
-    function openResetModal() {
-      modal.classList.remove('hidden'); modal.classList.add('flex');
-      document.body.style.overflow = 'hidden'; // 锁定背景滚动
-    }
-    function closeResetModal() {
-      modal.classList.remove('flex'); modal.classList.add('hidden');
-      document.body.style.overflow = '';
-    }
-    modal.addEventListener('click', (e) => { if (e.target === modal) closeResetModal(); });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modal.classList.contains('flex')) closeResetModal();
-    });
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const toggleWrap = document.getElementById("qq-toggle");
-      let hideTimer = null;
-      let scrolling = false;   // 用于检测惯性滚动
-
-      /* ====== 封装几个辅助函数 ====== */
-      const showButtons = () => toggleWrap.classList.remove("compact");
-      const hideButtons = () => toggleWrap.classList.add("compact");
-
-      /* -------- 在任何交互时立即显示完整按钮 -------- */
-      ["touchstart", "mousedown"].forEach(ev =>
-        document.addEventListener(ev, () => {
-          showButtons();
-          if (hideTimer) clearTimeout(hideTimer);
-        }, { passive: true })
-      );
-
-      /* -------- 监听滚动 / 惯性滚动停止 -------- */
-      window.addEventListener("scroll", () => {
-        showButtons();
-        scrolling = true;
-        if (hideTimer) clearTimeout(hideTimer);
-
-        // 300 ms 后若没有继续滚动，视为滚动停止
-        hideTimer = setTimeout(() => {
-          scrolling = false;
-          scheduleCompact();
-        }, 300);
-      }, { passive: true });
-
-      /* -------- 手指离开屏幕后可能还有惯性滚动 -------- */
-      ["touchend", "mouseup"].forEach(ev =>
-        document.addEventListener(ev, () => {
-          // 触摸结束时如果已经停止滚动，就直接开始 3 秒倒计时
-          if (!scrolling) scheduleCompact();
-        }, { passive: true })
-      );
-
-      /* -------- 倒计时 3 秒后进入 compact -------- */
-      function scheduleCompact() {
-        if (hideTimer) clearTimeout(hideTimer);
-        hideTimer = setTimeout(hideButtons, 3000);  // 3 秒
-      }
-
-      /* QQ 群号复制功能 */
-      document.querySelectorAll(".copy-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const qq = btn.dataset.qq;
-          navigator.clipboard.writeText(qq).then(() => {
-            const textSpan = btn.querySelector(".copy-text");
-            const original = textSpan.textContent;
-            textSpan.textContent = "✅ 已复制";
-            setTimeout(() => {
-              textSpan.textContent = original;
-            }, 2000);
-          });
-        });
-      });
-    });
-  </script>
+  <script src="static/main.js" defer></script>
   <script src="static/components/reset-calc.js" defer></script>
   <script src="static/version.config.js"></script>
   <script src="static/version.render.js"></script>

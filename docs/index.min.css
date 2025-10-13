@@ -21,11 +21,13 @@
     --color-blue-600: oklch(54.6% 0.245 262.881);
     --color-blue-700: oklch(48.8% 0.243 264.376);
     --color-blue-900: oklch(37.9% 0.146 265.522);
+    --color-indigo-500: oklch(58.5% 0.233 277.117);
     --color-indigo-600: oklch(51.1% 0.262 276.966);
     --color-indigo-700: oklch(45.7% 0.24 277.023);
     --color-indigo-800: oklch(39.8% 0.195 277.366);
     --color-purple-500: oklch(62.7% 0.265 303.9);
     --color-purple-600: oklch(55.8% 0.288 302.321);
+    --color-purple-700: oklch(49.6% 0.265 301.924);
     --color-pink-600: oklch(59.2% 0.249 0.584);
     --color-pink-700: oklch(52.5% 0.223 3.958);
     --color-slate-600: oklch(44.6% 0.043 257.281);
@@ -628,6 +630,10 @@
     --tw-gradient-from: var(--color-green-500);
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
+  .from-indigo-500 {
+    --tw-gradient-from: var(--color-indigo-500);
+    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+  }
   .from-indigo-800 {
     --tw-gradient-from: var(--color-indigo-800);
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
@@ -667,6 +673,10 @@
   }
   .to-pink-600 {
     --tw-gradient-to: var(--color-pink-600);
+    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+  }
+  .to-purple-600 {
+    --tw-gradient-to: var(--color-purple-600);
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
   .to-slate-700 {
@@ -946,6 +956,14 @@
       }
     }
   }
+  .hover\:from-indigo-600 {
+    &:hover {
+      @media (hover: hover) {
+        --tw-gradient-from: var(--color-indigo-600);
+        --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+      }
+    }
+  }
   .hover\:from-purple-600 {
     &:hover {
       @media (hover: hover) {
@@ -998,6 +1016,14 @@
     &:hover {
       @media (hover: hover) {
         --tw-gradient-to: var(--color-pink-700);
+        --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+      }
+    }
+  }
+  .hover\:to-purple-700 {
+    &:hover {
+      @media (hover: hover) {
+        --tw-gradient-to: var(--color-purple-700);
         --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
       }
     }
@@ -1460,6 +1486,7 @@
   }
 }
 
+/* ===== Sidebar 样式（原样） ===== */
 #qq-sidebar::before {
   content: '';
   position: absolute;
@@ -1480,17 +1507,19 @@
   padding-bottom: 100px;
 }
 
+/* ===== 基础按钮 ===== */
 .btn-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+/* ===== Toggle 容器 ===== */
 #qq-toggle {
   z-index: 60;
 }
 
-
+/* ===== 原始收缩态 ===== */
 #qq-toggle.compact .btn-toggle {
   width: 3rem;
   height: 3rem;
@@ -1505,4 +1534,114 @@
 #qq-toggle.compact .btn-toggle .icon {
   font-size: 1.25rem;
   line-height: 1;
+}
+
+/* =====================================
+   ▼▼ 增强部分：位置固定 + 居中对齐 + 紧凑布局 ▼▼
+   ===================================== */
+:root {
+  --qq-btn-w: 158px;      /* 展开态按钮宽度 */
+  --qq-btn-h: 44px;       /* 展开态按钮高度 */
+  --qq-btn-compact: 48px; /* 收缩态按钮尺寸（圆形） */
+  --qq-gap: 12px;         /* 按钮垂直间距 */
+  --qq-icon-gap: 8px;     /* 图标与文字水平间距（紧凑） */
+}
+
+/* 固定容器宽度，防止收缩时位置漂移 */
+#qq-toggle {
+  width: var(--qq-btn-w);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--qq-gap);
+}
+
+/* 展开态按钮布局（整体居中更紧凑） */
+#qq-toggle .btn-toggle {
+  width: var(--qq-btn-w);
+  height: var(--qq-btn-h);
+  justify-content: center;      /* 居中内容，视觉更紧凑 */
+  align-items: center;
+  padding-left: 12px;
+  padding-right: 12px;
+  gap: var(--qq-icon-gap);
+  border-radius: 9999px;
+  transition: width 0.25s ease, height 0.25s ease, padding 0.25s ease;
+}
+
+/* 图标统一垂直居中、尺寸标准化（避免 emoji 偏移） */
+#qq-toggle .btn-toggle,
+#qq-toggle .btn-toggle .label {
+  line-height: 1;
+}
+
+#qq-toggle .btn-toggle .icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  width: 1.35em;
+  height: 1.35em;
+  font-size: 1.25rem;
+  line-height: 1;
+  margin-right: 2px; /* 轻微左靠，让视觉更自然 */
+  /* transform: translateY(1px);  如 emoji 仍偏，可打开此项微调 */
+}
+
+/* 文字部分不再撑满整行，自动适配内容 */
+#qq-toggle .btn-toggle .label {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* ===== 收缩态（compact） ===== */
+#qq-toggle.compact .btn-toggle {
+  width: var(--qq-btn-compact);
+  height: var(--qq-btn-compact);
+  padding-left: 0;
+  padding-right: 0;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+}
+
+#qq-toggle.compact .btn-toggle .label {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin: 0;
+  transition: max-width 0.2s ease, opacity 0.15s ease;
+  display: none;
+}
+
+#qq-toggle.compact .btn-toggle .icon {
+  font-size: 1.35rem;
+}
+
+/* ===== 自适应：超小屏时自动缩窄 ===== */
+@media (max-width: 380px) {
+  :root {
+    --qq-btn-w: 184px;
+  }
+}
+
+/* === NEW 图标样式 === */
+.new-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-left: 6px;
+  vertical-align: middle;
+  text-shadow: 0 0 6px rgba(147, 197, 253, 0.7);
+  animation: pulseNew 1.6s infinite ease-in-out;
+}
+
+/* 轻微呼吸动效 */
+@keyframes pulseNew {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.08); }
 }
