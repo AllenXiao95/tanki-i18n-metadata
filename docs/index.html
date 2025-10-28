@@ -182,7 +182,8 @@
     <div class="divide-y divide-white/10 text-sm text-blue-100">
       <div class="flex items-center justify-between py-1">
         <div class="flex items-center gap-2">
-          <span>📦</span>
+          <span class="new-tag cursor-pointer"
+            onclick="window.open('https://redirect.lesta.ru/LGC/Lesta_Game_Center_Install_RU.exe', '_blank');">点击下载</span><span>📦</span>
           <span>RU 正式服：</span>
         </div>
         <div class="font-semibold text-white">
@@ -192,7 +193,8 @@
       </div>
       <div class="flex items-center justify-between py-1">
         <div class="flex items-center gap-2">
-          <span>🧪</span>
+          <span class="new-tag cursor-pointer"
+            onclick="window.open('https://lstus-ru.lesta.ru/ru/lesta/MT.PT.PRODUCTION/', '_blank');">点击下载</span><span>🧪</span>
           <span>PT 测试服：</span>
         </div>
         <div class="font-semibold text-white">
@@ -311,7 +313,7 @@
     <section id="changelog">
       <h2 class="text-xl font-semibold border-b border-gray-600 pb-2 mt-12">📝 更新日志</h2>
       <ul class="mt-4 space-y-2 text-gray-300 text-sm list-disc list-inside">
-        <li><strong>v2.3</strong><span class="new-tag">NEW</span>  - 2025/08/31
+        <li><strong>v2.3</strong><span class="new-tag">NEW</span> - 2025/08/31
           <ul class="ml-5 list-disc list-inside">
             <li>卸载入口迁至安装界面</li>
             <li>优化安装路径选择器</li>
@@ -431,27 +433,27 @@
   <!-- ███  QQ 侧边浮动按钮  ███ -->
   <div id="qq-toggle" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 items-end">
     <!-- 🧮 重置经验 -->
-    <button onclick="openResetModal()" class="btn-toggle bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700
+    <button onclick="openResetModal()" class="btn-toggle cursor-pointer bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700
               text-white text-sm font-semibold py-2 px-4 rounded-full shadow-lg
               transform hover:scale-105 transition-all">
       <span class="icon">🧮</span><span class="label">重置经验</span>
     </button>
     <!-- 📦 妙妙盒下载 -->
-    <button onclick="openBox()" class="btn-toggle bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700
+    <button onclick="openBox()" class="btn-toggle cursor-pointer bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700
               text-white text-sm font-semibold py-2 px-4 rounded-full shadow-lg
               transform hover:scale-105 transition-all">
       <span class="icon">📦</span><span class="label">盒子下载</span>
     </button>
 
     <!-- 🚀 来找组织 -->
-    <button onclick="toggleModal(true)" class="btn-toggle bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700
+    <button onclick="toggleModal(true)" class="btn-toggle cursor-pointer bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700
                    text-white text-sm font-semibold py-2 px-4 rounded-full shadow-lg
                    transform hover:scale-105 transition-all">
       <span class="icon">🚀</span><span class="label">来找组织</span>
     </button>
 
     <!-- ⬆️ 返回顶部 -->
-    <button onclick="window.scrollTo({ top: 0, behavior: 'smooth' });" class="btn-toggle bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900
+    <button onclick="window.scrollTo({ top: 0, behavior: 'smooth' });" class="btn-toggle cursor-pointer bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900
                    text-white text-sm font-semibold py-2 px-4 rounded-full shadow-lg
                    transform hover:scale-105 transition-all">
       <span class="icon">⬆️</span><span class="label">返回顶部</span>
