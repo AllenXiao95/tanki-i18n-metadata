@@ -24,6 +24,10 @@
     <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
     <link rel="me" href="https://github.com/AllenXiao95/tanki-i18n-metadata">
 
+    <!-- 图标 -->
+    <link rel="icon" href="static/app_icon.ico" />
+    <link rel="apple-touch-icon" href="static/app_icon.ico" />
+
     <!-- 移动端优化 -->
     <meta name="mobile-web-app-capable" content="yes" />
     <title>坦克世界俄服在线资讯流 - 最新资讯实时更新 | onlyax</title>
@@ -401,7 +405,7 @@
             const chip = document.createElement('span');
             chip.className = "inline-flex items-center gap-2 px-2.5 py-1 rounded-full border text-xs font-semibold";
             chip.style = chipStyle(item.chat_username || 'unknown');
-            chip.innerHTML = `<span class="inline-block size-1.5 rounded-full bg-current/70"></span>${item.chat_username || 'unknown'}`;
+            chip.innerHTML = `<span class="inline-block size-1.5 rounded-full bg-current/70"></span>${'TG'}`;
             const meta = document.createElement('span'); meta.className = "ml-auto text-xs text-slate-400"; meta.textContent = fmt(item.date);
             head.append(chip, meta);
 
