@@ -405,7 +405,7 @@
             const chip = document.createElement('span');
             chip.className = "inline-flex items-center gap-2 px-2.5 py-1 rounded-full border text-xs font-semibold";
             chip.style = chipStyle(item.chat_username || 'unknown');
-            chip.innerHTML = `<span class="inline-block size-1.5 rounded-full bg-current/70"></span>${'TG'}`;
+            chip.innerHTML = `<span class="inline-block size-1.5 rounded-full bg-current/70"></span>${item.chat_username || 'unknown'}`;
             const meta = document.createElement('span'); meta.className = "ml-auto text-xs text-slate-400"; meta.textContent = fmt(item.date);
             head.append(chip, meta);
 
