@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark" class="h-full">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="2025 最新《坦克世界》俄服 (Lesta) 最新资讯" />
+    <meta name="keywords"
+        content="坦克世界, 坦克世界俄服, World of Tanks, WoT RU, WoT Lesta, 最新资讯, 最新, 坦克世界 俄服 资讯, Lesta 服, 俄服 资讯, 坦克世界 俄服 资讯, 资讯, 坦克世界中文资讯, 坦克世界俄服资讯, WoT 俄服 资讯, WoT 俄服 最新资讯, 坦克世界 俄服 资讯, 坦克世界 俄服 资讯, worldoftanks 中文资讯" />
+
+    <meta name="author" content="Allen.Xiao" />
+    <meta name="robots" content="information, follow" />
+
+    <!-- Open Graph 基础卡片（适用于微信、QQ、Facebook） -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="坦克世界俄服在线资讯流 - 最新资讯实时更新 | onlyax" />
+    <meta property="og:description" content="2025 最新《坦克世界》俄服 (Lesta) 最新资讯" />
+    <meta property="og:url" content="https://tanki.onlyax.com/information" />
+    <meta property="og:image" content="https://tanki.onlyax.com/static/banner.webp" />
+
+    <!-- 添加 canonical 链接，防止重复内容 -->
+    <link rel="canonical" href="https://tanki.onlyax.com/information" />
+
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+    <link rel="me" href="https://github.com/AllenXiao95/tanki-i18n-metadata">
+
+    <!-- 移动端优化 -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <title>坦克世界俄服在线资讯流 - 最新资讯实时更新 | onlyax</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#eef6ff', 100: '#d9ebff', 200: '#b8d9ff', 300: '#8ac0ff', 400: '#5ea9ff', 500: '#3e95ff', 600: '#2b7ae6', 700: '#205fc0', 800: '#1f4e97', 900: '#1e4477' }
+                    },
+                    boxShadow: {
+                        card: '0 8px 30px rgba(20,25,40,.35), 0 2px 10px rgba(0,0,0,.35)',
+                        glass: '0 10px 30px rgba(15,23,42,.45)',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn .25s ease-out both',
+                        'slide-down': 'slideDown .25s ease-out both',
+                        'pulse-soft': 'pulseSoft 1.8s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeIn: { from: { opacity: 0 }, to: { opacity: 1 } },
+                        slideDown: { from: { transform: 'translateY(-6px)', opacity: .0 }, to: { transform: 'translateY(0)', opacity: 1 } },
+                        pulseSoft: { '0%,100%': { opacity: .7 }, '50%': { opacity: 1 } }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --sticky-header: 64px;
+        }
+
+        @keyframes fadein {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -4px)
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate(-50%, 0)
+            }
+        }
+
+        .animate-fadein {
+            animation: fadein .25s both
+        }
+
+
+        /* 页面基色（dark 默认） */
+        body {
+            background: #0b1220;
+            color: #e5e7eb;
+        }
+
+        /* 让 scrollIntoView 时避让 Header，并留 8px 呼吸感 */
+        article {
+            scroll-margin-top: calc(var(--sticky-header) + 8px);
+        }
+
+        /* 正文容器：只做可见性淡入，不做高度动画（高度交给外层卡片做 FLIP） */
+        .collapsible {
+            display: none;
+            opacity: 0;
+            transition: opacity .22s ease;
+        }
+
+        .collapsible[data-open="true"] {
+            display: block;
+            opacity: 1;
+        }
+
+        /* 卡片在做高度动画时避免溢出导致的视觉跳动 */
+        .card-animating {
+            overflow: hidden;
+        }
+
+        /* 动画期间缩略图保留占位，避免塌陷；动画结束后再真正隐藏/显示 */
+        .thumbs-hold {
+            visibility: hidden;
+        }
+
+        /* 富文容器：文本换行 + 链接 + 图片 */
+        .rich {
+            color: #e5e7eb;
+            white-space: pre-line;
+            /* ✅ 支持 \n / <br> 换行 */
+            line-height: 1.65;
+        }
+
+        .rich :where(p, li, span, h1, h2, h3, h4, h5, h6, blockquote, strong, em, code) {
+            color: inherit !important;
+        }
+
+        .rich a {
+            color: #93c5fd;
+            text-decoration: underline;
+        }
+
+        .rich img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: .5rem 0;
+            /* ✅ 上下间隔 */
+            border-radius: .75rem;
+            border: 1px solid rgba(30, 41, 59, .7);
+        }
+
+        /* 多图时收紧内部第一/最后一张的间距 */
+        .rich p>img:first-child {
+            margin-top: 0;
+        }
+
+        .rich p>img:last-child {
+            margin-bottom: 0;
+        }
+
+        .rich table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: .5rem 0;
+        }
+
+        .rich th,
+        .rich td {
+            border: 1px solid rgba(30, 41, 59, .7);
+            padding: .5rem;
+        }
+
+        .rich pre,
+        .rich code {
+            background: rgba(2, 6, 23, .5);
+            border-radius: .5rem;
+            padding: .25rem .4rem;
+        }
+
+        /* Light 主题覆盖 */
+        html[data-theme="light"] body {
+            background: #f8fafc !important;
+            color: #0f172a !important;
+        }
+
+        html[data-theme="light"] header {
+            background-color: #ffffffc4 !important;
+            backdrop-filter: saturate(1.2) blur(8px) !important;
+            border-bottom-color: #e2e8f0 !important;
+        }
+
+        html[data-theme="light"] article {
+            background: #ffffffcc !important;
+            border-color: #e2e8f0 !important;
+        }
+
+        html[data-theme="light"] article:hover {
+            background: #ffffff !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        html[data-theme="light"] .rich {
+            color: #1f2937 !important;
+        }
+
+        html[data-theme="light"] .rich a {
+            color: #2563eb !important;
+        }
+
+        html[data-theme="light"] .rich img {
+            border-color: #e2e8f0 !important;
+        }
+
+        html[data-theme="light"] .rich th,
+        .rich td {
+            border-color: #e2e8f0 !important;
+        }
+
+        html[data-theme="light"] .rich pre,
+        .rich code {
+            background: #f1f5f9 !important;
+            color: #0f172a !important;
+        }
+
+        html[data-theme="light"] .soft-btn {
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+            color: #0f172a !important;
+        }
+
+        html[data-theme="light"] .soft-btn:hover {
+            background: #ffffff !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        html[data-theme="light"] #toTop {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            color: #0f172a !important;
+            box-shadow: 0 8px 20px rgba(2, 6, 23, .08) !important;
+        }
+
+        html[data-theme="light"] #loadState {
+            color: #64748b !important;
+        }
+
+        html[data-theme="light"] .border-slate-800\/70 {
+            border-color: #e2e8f0 !important;
+        }
+    </style>
+</head>
+
+<body class="h-full selection:bg-brand-400/30 selection:text-white">
+    <!-- 顶部 -->
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-slate-900/70 border-b border-slate-800/70">
+        <div class="mx-auto max-w-3xl px-4 py-3 flex items-center gap-3">
+            <div
+                class="size-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 shadow-glass grid place-content-center">
+                <span class="text-white font-black">i</span>
+            </div>
+            <h1 class="text-lg font-semibold tracking-wide">Tanki在线资讯流</h1>
+            <div class="ml-auto flex items-center gap-2">
+                <!-- 主题切换按钮 -->
+                <button id="themeBtn"
+                    class="soft-btn inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-slate-700/70 bg-slate-800/60 hover:bg-slate-800 text-slate-200 text-sm transition"
+                    title="切换浅色/深色">
+                    <svg id="themeIcon" class="size-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path
+                            d="M12 4v2m0 12v2m8-8h-2M6 12H4m12.95 5.657l-1.414-1.414M8.464 8.464 7.05 7.05m10.607 0-1.414 1.414M8.464 15.536 7.05 16.95"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" />
+                    </svg>
+                    <span id="themeText">浅色</span>
+                </button>
+
+                <button id="refreshBtn"
+                    class="soft-btn hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-slate-700/70 bg-slate-800/60 hover:bg-slate-800 text-slate-200 text-sm transition">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none">
+                        <path d="M4 4v6h6M20 20v-6h-6" stroke="currentColor" stroke-width="1.5"
+                            stroke-linecap="round" />
+                        <path d="M20 8a 8 8 0 0 0-14.9-3M4 16a 8 8 0 0 0 14.9 3" stroke="currentColor"
+                            stroke-width="1.5" stroke-linecap="round" />
+                    </svg>
+                    手动刷新
+                </button>
+            </div>
+        </div>
+
+        <!-- 新消息 Banner -->
+        <div id="newBanner" class="hidden mx-auto max-w-3xl px-4 pb-3 animate-slide-down">
+            <button
+                class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-brand-500/15 hover:bg-brand-500/25 text-brand-200 border border-brand-400/30 hover:border-brand-400/50 transition">
+                <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="font-medium">有新消息，点击查看</span>
+                <svg class="size-4" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- 主体 -->
+    <main class="mx-auto max-w-3xl px-4">
+        <section id="list" class="flex flex-col gap-4 py-4"></section>
+        <div id="sentinel" class="h-10"></div>
+        <div id="loadState" class="flex items-center justify-center gap-2 text-slate-400 text-sm py-8">
+            <svg class="size-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity=".25" stroke-width="3" />
+                <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+            </svg>
+            <span>加载中…</span>
+        </div>
+        <p id="empty" class="hidden text-center text-slate-500 py-12">暂无内容</p>
+
+        <button id="toTop"
+            class="fixed bottom-5 right-5 size-10 rounded-full bg-slate-800/80 hover:bg-slate-800 border border-slate-700 shadow-card grid place-content-center transition opacity-0 pointer-events-none">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none">
+                <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+        </button>
+    </main>
+
+    <script>
+        /** ===== 主题切换 ===== */
+        const themeBtn = () => document.getElementById('themeBtn');
+        const themeText = () => document.getElementById('themeText');
+        const themeIcon = () => document.getElementById('themeIcon');
+
+        function getSystemTheme() { return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; }
+        function getStoredTheme() { try { return localStorage.getItem('theme') || ''; } catch { return ''; } }
+        function storeTheme(t) { try { localStorage.setItem('theme', t); } catch { } }
+        function applyTheme(t) {
+            document.documentElement.setAttribute('data-theme', t);
+            if (t === 'light') {
+                themeText() && (themeText().textContent = '深色');
+                themeIcon() && (themeIcon().innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>');
+            } else {
+                themeText() && (themeText().textContent = '浅色');
+                themeIcon() && (themeIcon().innerHTML = '<path d="M12 4v2m0 12v2m8-8h-2M6 12H4m12.95 5.657l-1.414-1.414M8.464 8.464 7.05 7.05m10.607 0-1.414 1.414M8.464 15.536 7.05 16.95" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>');
+            }
+        }
+        function initTheme() { applyTheme(getStoredTheme() || getSystemTheme()); }
+        function toggleTheme() { const cur = document.documentElement.getAttribute('data-theme') || 'dark'; const next = cur === 'dark' ? 'light' : 'dark'; applyTheme(next); storeTheme(next); }
+        window.addEventListener('DOMContentLoaded', () => { initTheme(); themeBtn()?.addEventListener('click', toggleTheme); });
+
+        /** ===== 配置 ===== */
+        const API_BASE = 'https://kfc.goover.cn/information/getInformationList';
+        const AUTH = { token: ',;als[ox_)L@:<Express;l,d-da/2sa/as9q,' }; // ← 维持你给的 token
+        const PAGE_SIZE = 10;
+        const POLL_INTERVAL_MS = 300000; // 5分钟
+
+        /** ===== 状态 & DOM & 工具 ===== */
+        let page = 1, total = 0, loading = false, ended = false;
+        const knownIds = new Set();
+        const $ = (s, el = document) => el.querySelector(s);
+        const listEl = $('#list'), bannerEl = $('#newBanner'), sentinelEl = $('#sentinel'), loadStateEl = $('#loadState'), toTopEl = $('#toTop');
+
+        const fmt = iso => { if (!iso) return ''; const d = new Date(iso), pad = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+        const isToday = iso => { const d = new Date(iso), n = new Date(); return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && d.getDate() === n.getDate(); };
+        const hashHue = (str = 'x') => { let h = 0; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0; return h % 360; };
+        const chipStyle = name => { const hue = hashHue(name); return `background-color:hsl(${hue} 60% 22% / .55);border-color:hsl(${hue} 70% 55% / .5);color:hsl(${hue} 90% 85%);`; };
+
+        function dehtml(str = '') { if (!/[<&]/.test(str)) return str; const t = document.createElement('textarea'); t.innerHTML = str; const out = t.value; if (out.includes('&lt;') || out.includes('&gt;')) { t.innerHTML = out; return t.value; } return out; }
+        function fixLazyImage(el) { const cands = ['data-src', 'data-original', 'data-actualsrc', 'data-url', 'data-lazy-src', 'data-img', 'data-href']; for (const k of cands) { const v = el.getAttribute(k); if (v && !el.getAttribute('src')) { el.setAttribute('src', v); break; } } }
+        function imgsFrom(html) { const wrap = document.createElement('div'); wrap.innerHTML = dehtml(html || ''); wrap.querySelectorAll('img').forEach(fixLazyImage); return Array.from(wrap.querySelectorAll('img')).map(i => i.getAttribute('src')).filter(Boolean); }
+        function preload(srcList) { return Promise.all((srcList || []).map(src => new Promise(res => { const im = new Image(); im.referrerPolicy = 'no-referrer'; im.decoding = 'async'; im.loading = 'eager'; im.onload = im.onerror = () => res(); im.src = src; }))); }
+        function sanitizeAndHydrate(root) {
+            if (!root) return;
+            root.querySelectorAll('.hidden, .invisible, .is-hidden, .dn, .none').forEach(n => n.classList.remove('hidden', 'invisible', 'is-hidden', 'dn', 'none'));
+            root.querySelectorAll('[style]').forEach(n => {
+                const s = n.getAttribute('style') || ''; const low = s.toLowerCase();
+                if (/display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0(\.0+)?/.test(low)) {
+                    const kept = s.replace(/display\s*:\s*none\s*;?/ig, '').replace(/visibility\s*:\s*hidden\s*;?/ig, '').replace(/opacity\s*:\s*0(\.0+)?\s*;?/ig, '');
+                    n.setAttribute('style', kept);
+                }
+            });
+            root.querySelectorAll('img').forEach(img => {
+                fixLazyImage(img);
+                img.referrerPolicy = 'no-referrer'; img.loading = 'lazy'; img.decoding = 'async';
+                if (!img.getAttribute('width') || !img.getAttribute('height')) { img.style.aspectRatio = '16/9'; img.addEventListener('load', () => { img.style.aspectRatio = ''; }, { once: true }); }
+            });
+            root.querySelectorAll('a[href]').forEach(a => { a.target = '_blank'; a.rel = 'noopener noreferrer nofollow'; });
+        }
+        function cardType(translationHtml) { const c = imgsFrom(translationHtml).length; return c === 0 ? 'text' : (c === 1 ? 'single' : 'multi'); }
+
+        /** ===== 请求 ===== */
+        async function fetchList(p, size) {
+            const url = new URL(API_BASE);
+            url.searchParams.set('pageNo', p);      // 使用后端的 pageNo
+            url.searchParams.set('pageSize', size);
+            const res = await fetch(url.toString(), {
+                method: 'GET',
+                headers: { 'Accept': 'application/json', ...(AUTH.token ? { token: AUTH.token } : {}) },
+                cache: 'no-cache'
+            });
+            if (!res.ok) throw new Error('网络错误 ' + res.status);
+            return res.json();
+        }
+
+        /** ===== 渲染 ===== */
+        function renderCard(item, { append = true } = {}) {
+            if (knownIds.has(item.id)) return; knownIds.add(item.id);
+
+            const type = cardType(item.translation);
+            const imgs = imgsFrom(item.translation);
+
+            const card = document.createElement('article');
+            card.className = "group rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-sm hover:bg-slate-900/75 hover:border-slate-700 shadow-card transition animate-fade-in relative";
+
+            // 头
+            const head = document.createElement('div'); head.className = "flex items-center gap-3 px-4 pt-4";
+            const chip = document.createElement('span');
+            chip.className = "inline-flex items-center gap-2 px-2.5 py-1 rounded-full border text-xs font-semibold";
+            chip.style = chipStyle(item.chat_username || 'unknown');
+            chip.innerHTML = `<span class="inline-block size-1.5 rounded-full bg-current/70"></span>${item.chat_username || 'unknown'}`;
+            const meta = document.createElement('span'); meta.className = "ml-auto text-xs text-slate-400"; meta.textContent = fmt(item.date);
+            head.append(chip, meta);
+
+            // summary（无 sticky）
+            const sum = document.createElement('div'); sum.className = "px-4 pt-2 pb-2 transition";
+            const titleRow = document.createElement('div'); titleRow.className = "flex items-start gap-2";
+            if (isToday(item.date)) {
+                const flag = document.createElement('span');
+                flag.className = "mt-0.5 inline-flex items-center gap-1 text-emerald-400 font-bold text-xs";
+                flag.innerHTML = `<span class="size-1.5 rounded-full bg-emerald-400 animate-pulse-soft"></span>New`;
+                titleRow.appendChild(flag);
+            }
+            const titleText = document.createElement('h3');
+            titleText.className = "text-base md:text-lg font-semibold leading-snug";
+            titleText.textContent = item.summary || (item.translation ? '（该资讯含图文）' : '（暂无摘要）');
+            titleRow.appendChild(titleText); sum.appendChild(titleRow);
+
+            // 缩略图
+            const thumbs = document.createElement('div'); thumbs.className = "px-4 pb-3";
+            if (type === 'single' && imgs[0]) {
+                thumbs.innerHTML = `<img class="w-full h-auto rounded-xl border border-slate-800/70 shadow-glass object-cover" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${imgs[0]}" />`;
+            } else if (type === 'multi') {
+                const four = imgs.slice(0, 4);
+                thumbs.innerHTML = `<div class="grid grid-cols-2 gap-2">${four.map(s => `<img class="w-full h-auto rounded-xl border border-slate-800/70 object-cover" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${s}" />`).join('')}</div>`;
+            } else {
+                thumbs.classList.add('hidden');
+            }
+
+            // 正文
+            const content = document.createElement('div'); content.className = "collapsible px-4 pb-4 pt-2 rich"; content.dataset.open = "false";
+
+            // 底部
+            const foot = document.createElement('div'); foot.className = "flex items-center justify-between gap-3 px-4 py-3 border-t border-slate-800/70";
+            const left = document.createElement('span'); left.className = "text-xs text-slate-400"; left.textContent = `#${item.id}・${item.chat_username}`;
+            const btn = document.createElement('button');
+            btn.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-slate-600 text-slate-200 text-sm transition";
+            btn.innerHTML = `<svg class="size-4" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>展开</span>`;
+
+            // —— 展开/收起（FLIP + 自动滚动到卡片顶部）
+            btn.addEventListener('click', () => {
+                const isOpen = content.dataset.open === "true";
+
+                // ✅ 先滚到卡片顶端（避让 header）
+                card.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+
+                // 首次展开：注入与清理正文
+                if (!isOpen && !content.__hydrated) {
+                    const html = dehtml(item.translation || '');
+                    content.innerHTML = html.trim() ? html : '<p class="text-slate-400">（无内容）</p>';
+                    sanitizeAndHydrate(content);
+                    content.__hydrated = true;
+                }
+
+                // 1) 记录变化前高度
+                const fromH = card.offsetHeight;
+
+                // 2) 切到目标状态（预应用）
+                if (!isOpen) {
+                    content.dataset.open = "true";     // 展开正文
+                    thumbs.classList.add('thumbs-hold'); // 动画中保持占位
+                } else {
+                    content.dataset.open = "false";    // 收起正文
+                    thumbs.classList.remove('hidden'); // 收起时需要占位回到文中
+                    thumbs.classList.add('thumbs-hold');
+                }
+
+                // 触发布局
+                void card.offsetHeight;
+
+                // 3) 记录变化后高度
+                const toH = card.offsetHeight;
+
+                // 4) 动画卡片高度
+                card.classList.add('card-animating');
+                card.style.height = fromH + 'px';
+                card.style.transition = 'height .35s ease';
+                requestAnimationFrame(() => { card.style.height = toH + 'px'; });
+
+                // 5) 动画完成收尾
+                const done = () => {
+                    card.removeEventListener('transitionend', done);
+                    card.classList.remove('card-animating');
+                    card.style.height = '';
+                    card.style.transition = '';
+
+                    if (!isOpen) {
+                        // 展开完成：缩略图真正隐藏
+                        thumbs.classList.remove('thumbs-hold');
+                        thumbs.classList.add('hidden');
+                        btn.innerHTML = `<svg class="size-4 rotate-180 transition" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>收起</span>`;
+                        const imgList = Array.from(content.querySelectorAll('img')).map(i => i.src).filter(Boolean);
+                        preload(imgList.slice(0, 16));
+                    } else {
+                        // 收起完成：缩略图恢复可见（若无图文则保持隐藏）
+                        thumbs.classList.remove('thumbs-hold');
+                        thumbs.classList.toggle('hidden', cardType(item.translation) === 'text');
+                        btn.innerHTML = `<svg class="size-4" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>展开</span>`;
+                    }
+
+                    // ✅ 动画结束后再“校准”一次位置
+                    card.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+                };
+                card.addEventListener('transitionend', done, { once: true });
+            });
+
+            foot.append(left, btn);
+            card.append(head, sum, thumbs, content, foot);
+            append ? listEl.appendChild(card) : listEl.prepend(card);
+        }
+
+        /** ===== 数据流 ===== */
+        async function loadInitial() {
+            if (loading) return; loading = true;
+            try {
+                const json = await fetchList(page, PAGE_SIZE);
+                const data = json?.data || {}; total = Number(data.total || 0);
+                const list = data.list || [];
+                if (list.length === 0) { $('#empty').classList.remove('hidden'); loadStateEl.classList.add('hidden'); return; }
+                list.forEach(it => renderCard(it, { append: true }));
+                if (list.length < PAGE_SIZE) { ended = true; loadStateEl.innerHTML = `<span class="text-slate-500 text-sm">没有更多了</span>`; }
+            } catch (e) {
+                console.error(e); loadStateEl.innerHTML = `<span class="text-rose-400 text-sm">加载失败，请稍后重试</span>`;
+            } finally { loading = false; }
+        }
+
+        async function loadMore() {
+            if (loading || ended) return; loading = true; page += 1;
+            try {
+                const json = await fetchList(page, PAGE_SIZE);
+                const list = json?.data?.list || [];
+                if (list.length === 0) { ended = true; loadStateEl.innerHTML = `<span class="text-slate-500 text-sm">没有更多了</span>`; return; }
+                list.forEach(it => renderCard(it, { append: true }));
+            } catch (e) {
+                console.error(e); page -= 1;
+            } finally { loading = false; }
+        }
+
+        async function getServerTotal() { try { const json = await fetchList(1, 1); return Number(json?.data?.total || 0); } catch { return total; } }
+        async function pollNew() { const nt = await getServerTotal(); if (nt > total) bannerEl.classList.remove('hidden'); }
+        async function prependIncrement() {
+            bannerEl.classList.add('hidden');
+            try {
+                const nt = await getServerTotal(); const need = Math.max(1, nt - total);
+                if (need <= 1) return showToast('已经是最新内容啦');
+
+                const json = await fetchList(1, need); const inc = json?.data?.list || [];
+                [...inc].reverse().forEach(it => renderCard(it, { append: false }));
+                total = nt; window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (e) { console.error(e); }
+        }
+
+        /** ===== 交互 ===== */
+        function showToast(msg) {
+            const el = document.createElement('div');
+            el.textContent = msg;
+            el.className = `
+                fixed left-1/2 top-14 -translate-x-1/2 z-[9999]
+                bg-black/80 text-white text-sm px-3 py-1.5
+                rounded-md shadow backdrop-blur
+                animate-fadein
+            `;
+            document.body.appendChild(el);
+            setTimeout(() => el.classList.add('opacity-0'), 1300);
+            setTimeout(() => el.remove(), 1800);
+        }
+
+        const io = new IntersectionObserver((entries) => { entries.forEach(e => { if (e.isIntersecting) loadMore(); }); }, { root: null, rootMargin: '200px', threshold: 0 });
+        io.observe(sentinelEl);
+
+        let showTop = false;
+        window.addEventListener('scroll', () => {
+            const need = window.scrollY > 500;
+            if (need !== showTop) {
+                showTop = need;
+                if (need) toTopEl.classList.remove('opacity-0', 'pointer-events-none');
+                else toTopEl.classList.add('opacity-0', 'pointer-events-none');
+            }
+        }, { passive: true });
+        toTopEl.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        // bannerEl.addEventListener('click', prependIncrement);
+        $('#refreshBtn')?.addEventListener('click', prependIncrement);
+
+        /** ===== 启动 ===== */
+        (async () => { await loadInitial(); setInterval(pollNew, POLL_INTERVAL_MS); })();
+    </script>
+</body>
+
+</html>
