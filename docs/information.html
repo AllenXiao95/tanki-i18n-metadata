@@ -406,6 +406,7 @@
       // —— 分享按钮：展开后截图 + 水印
       shareBtn.addEventListener('click', async () => {
         try {
+          const PROXY = '/proxy?url='; // Cloudflare Pages Proxy
           // 若未展开，先展开一次
           if (content.dataset.open !== "true") {
             if (!content.__hydrated) {
@@ -422,6 +423,7 @@
             backgroundColor: null,
             scale: window.devicePixelRatio < 2 ? 2 : 1.5,
             useCORS: true,
+            proxy: PROXY,
             allowTaint: true
           });
 
