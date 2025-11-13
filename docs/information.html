@@ -402,149 +402,7 @@
 
       root.querySelectorAll('a[href]').forEach(a => { a.target = '_blank'; a.rel = 'noopener noreferrer nofollow'; });
     }
-    // canvas → Blob（兼容老 iOS 无 toBlob）
-    function canvasToBlob(canvas) {
-      return new Promise((resolve, reject) => {
-        if (canvas.toBlob) {
-          canvas.toBlob(b => b ? resolve(b) : reject(new Error('toBlob failed')), 'image/png');
-        } else {
-          try {
-            const dataURL = canvas.toDataURL('image/png');
-            const byteString = atob(dataURL.split(',')[1]);
-            const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
-            const ab = new ArrayBuffer(byteString.length);
-            const ia = new Uint8Array(ab);
-            for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
-            resolve(new Blob([ab], { type: mimeString }));
-          } catch (e) { reject(e); }
-        }
-      });
-    }
-
-    // 简单的预览弹窗（移动端）：长按图片保存/分享
-    function openImagePreviewModal(blobOrUrl, filename = 'image.png') {
-      try {
-        // —— 创建图片 URL
-        const url = typeof blobOrUrl === 'string' ? blobOrUrl : URL.createObjectURL(blobOrUrl);
-
-        // —— 如果已经存在旧弹窗，先移除
-        const old = document.getElementById('previewOverlay');
-        if (old) old.remove();
-
-        // —— 遮罩层
-        const overlay = document.createElement('div');
-        overlay.id = 'previewOverlay';
-        overlay.style.cssText = `
-      position: fixed;
-      inset: 0;
-      z-index: 999999 !important;
-      background: rgba(0,0,0,0.9);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-    `;
-
-        // —— 图片元素
-        const img = document.createElement('img');
-        img.src = url;
-        img.alt = filename;
-        img.style.cssText = `
-      max-width: 92vw;
-      max-height: 75vh;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.15);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-      object-fit: contain;
-      background: #000;
-    `;
-
-        // —— 提示文字
-        const tip = document.createElement('div');
-        tip.textContent = '📸 长按图片可保存或分享';
-        tip.style.cssText = `
-      color: #e5e7eb;
-      font-size: 15px;
-      margin-top: 12px;
-      text-align: center;
-    `;
-
-        // —— 按钮栏
-        const bar = document.createElement('div');
-        bar.style.cssText = `
-      margin-top: 14px;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: center;
-    `;
-
-        // 通用按钮样式
-        const mkBtn = (text) => {
-          const b = document.createElement('button');
-          b.textContent = text;
-          b.style.cssText = `
-        padding: 10px 18px;
-        border-radius: 8px;
-        background: rgba(255,255,255,0.12);
-        color: #fff;
-        border: 1px solid rgba(255,255,255,0.2);
-        font-size: 14px;
-        backdrop-filter: blur(2px);
-      `;
-          return b;
-        };
-
-        // —— “复制图片”按钮（部分浏览器支持）
-        const btnCopy = mkBtn('复制图片');
-        btnCopy.onclick = async () => {
-          try {
-            if (navigator.clipboard && window.ClipboardItem) {
-              const blob = typeof blobOrUrl === 'string'
-                ? await (await fetch(blobOrUrl)).blob()
-                : blobOrUrl;
-              await navigator.clipboard.write([new ClipboardItem({ [blob.type || 'image/png']: blob })]);
-              tip.textContent = '✅ 已复制到剪贴板';
-            } else {
-              tip.textContent = '❌ 当前浏览器不支持复制图片';
-            }
-          } catch {
-            tip.textContent = '❌ 复制失败';
-          }
-        };
-
-        // —— “关闭”按钮
-        const btnClose = mkBtn('关闭');
-        btnClose.onclick = () => {
-          overlay.remove();
-          try { URL.revokeObjectURL(url); } catch { }
-        };
-
-        // —— 按钮栏组装
-        bar.append(btnCopy, btnClose);
-
-        // —— 组装所有元素
-        overlay.append(img, tip, bar);
-        document.body.appendChild(overlay);
-
-        // —— 阻止背景滚动（移动端必要）
-        document.body.style.overflow = 'hidden';
-        overlay.addEventListener('click', (e) => {
-          if (e.target === overlay) btnClose.click();
-        });
-
-        // —— 在图片加载完后滚动到顶部，确保弹窗在视野内
-        img.onload = () => window.scrollTo({ top: 0 });
-
-      } catch (e) {
-        console.error('openImagePreviewModal error', e);
-      }
-    }
-
-
+    const isPC = !/mobile|android|iphone|ipad|ipod/i.test(navigator.userAgent);
     function cardType(translationHtml) { const c = imgsFrom(translationHtml).length; return c === 0 ? 'text' : (c === 1 ? 'single' : 'multi'); }
 
     /** ===== 请求 ===== */
@@ -660,7 +518,8 @@
       btn.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-slate-600 text-slate-200 text-sm transition";
       btn.innerHTML = `<svg class="size-4" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>展开</span>`;
 
-      const rightBtns = document.createElement('div'); rightBtns.className = "flex items-center gap-2"; rightBtns.append(shareBtn, btn);
+      const rightBtns = document.createElement('div'); rightBtns.className = "flex items-center gap-2"; 
+      isPC ? rightBtns.append(shareBtn, btn) : rightBtns.append(btn);
       // const rightBtns = document.createElement('div'); rightBtns.className = "flex items-center gap-2"; rightBtns.append(btn);
       foot.append(left, rightBtns);
 
@@ -723,9 +582,8 @@
 
       // —— 分享按钮：展开后截图 + 水印
       shareBtn.addEventListener('click', async () => {
-        let blob, url;
         try {
-          // ——若未展开，先展开并 hydrate 正文
+          // 若未展开，先展开一次
           if (content.dataset.open !== "true") {
             if (!content.__hydrated) {
               const html = dehtml(item.translation || '');
@@ -737,15 +595,22 @@
             thumbs.classList.add('hidden');
           }
 
-          // ——进入分享态：隐藏底部按钮等
-          card.classList.add('sharing'); // .sharing .hide-on-share { display:none!important; }
+          card.classList.add('sharing');
+          // ——确保正文图片不会被占位比例拉伸 & 等图片加载完
+          const imgsInContent = Array.from(content.querySelectorAll('img'));
+          imgsInContent.forEach(im => {
+            // 移除任何占位比例，避免被强制 16:9
+            im.style.removeProperty('aspect-ratio');
+          });
 
-          // ——确保正文图片加载完，并移除任何占位比例，避免拉伸
-          const imgs = Array.from(content.querySelectorAll('img'));
-          imgs.forEach(im => im.style.removeProperty('aspect-ratio'));
-          await Promise.all(imgs.map(im => new Promise(r => (im.complete ? r() : (im.onload = im.onerror = () => r())))));
+          // 等待所有图片加载完成（包括已缓存 complete=true 的）
+          await Promise.all(
+            imgsInContent.map(im => new Promise(res => {
+              if (im.complete) return res();
+              im.onload = im.onerror = () => res();
+            }))
+          );
 
-          // ——截图
           const canvas = await html2canvas(card, {
             backgroundColor: "#ffffff",
             scale: window.devicePixelRatio < 2 ? 2 : 1.5,
@@ -753,25 +618,27 @@
             allowTaint: false
           });
 
-          // ——叠底色 + 水印
           const out = document.createElement('canvas');
           out.width = canvas.width; out.height = canvas.height;
           const ctx = out.getContext('2d');
-          ctx.fillStyle = '#0b1220';
-          ctx.fillRect(0, 0, out.width, out.height);
+          ctx.fillStyle = '#0b1220'; ctx.fillRect(0, 0, out.width, out.height);
           ctx.drawImage(canvas, 0, 0);
           drawWatermark(out, 'tanki.onlyax.com');
 
-          blob = await canvasToBlob(out);
-          const fileName = `tanki-${item.id}.png`;
-          openImagePreviewModal(blob, fileName);
+          out.toBlob(blob => {
+            const a = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            a.href = url; a.download = `tanki-${item.id}.png`;
+            document.body.appendChild(a); a.click(); a.remove();
+            URL.revokeObjectURL(url);
+          }, 'image/png');
+
         } catch (e) {
           console.error(e);
-          showToast('分享失败，请重试');
+          showToast('分享图片生成失败');
         } finally {
-          // ——总是恢复界面
+          // 恢复
           card.classList.remove('sharing');
-          if (url) setTimeout(() => URL.revokeObjectURL(url), 5000);
         }
       });
 
