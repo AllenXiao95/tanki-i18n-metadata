@@ -351,8 +351,8 @@
       btn.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/70 hover:bg-slate-800 border border-slate-700/70 hover:border-slate-600 text-slate-200 text-sm transition";
       btn.innerHTML = `<svg class="size-4" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>展开</span>`;
 
-      // const rightBtns = document.createElement('div'); rightBtns.className = "flex items-center gap-2"; rightBtns.append(shareBtn, btn);
-      const rightBtns = document.createElement('div'); rightBtns.className = "flex items-center gap-2"; rightBtns.append(btn);
+      const rightBtns = document.createElement('div'); rightBtns.className = "flex items-center gap-2"; rightBtns.append(shareBtn, btn);
+      // const rightBtns = document.createElement('div'); rightBtns.className = "flex items-center gap-2"; rightBtns.append(btn);
       foot.append(left, rightBtns);
 
       // —— 展开/收起（含 FLIP 动画）
