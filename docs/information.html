@@ -423,57 +423,127 @@
 
     // 简单的预览弹窗（移动端）：长按图片保存/分享
     function openImagePreviewModal(blobOrUrl, filename = 'image.png') {
-      const url = typeof blobOrUrl === 'string' ? blobOrUrl : URL.createObjectURL(blobOrUrl);
+      try {
+        // —— 创建图片 URL
+        const url = typeof blobOrUrl === 'string' ? blobOrUrl : URL.createObjectURL(blobOrUrl);
 
-      const overlay = document.createElement('div');
-      overlay.style.cssText = `
-    position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.86);
-    display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;padding:16px;
-  `;
+        // —— 如果已经存在旧弹窗，先移除
+        const old = document.getElementById('previewOverlay');
+        if (old) old.remove();
 
-      const img = document.createElement('img');
-      img.src = url;
-      img.alt = filename;
-      img.style.cssText = 'max-width:92vw;max-height:70vh;border-radius:12px;border:1px solid rgba(255,255,255,.12)';
+        // —— 遮罩层
+        const overlay = document.createElement('div');
+        overlay.id = 'previewOverlay';
+        overlay.style.cssText = `
+      position: fixed;
+      inset: 0;
+      z-index: 999999 !important;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    `;
 
-      const tip = document.createElement('div');
-      tip.textContent = '长按图片可保存/分享';
-      tip.style.cssText = 'color:#cbd5e1;font-size:13px;text-align:center';
+        // —— 图片元素
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = filename;
+        img.style.cssText = `
+      max-width: 92vw;
+      max-height: 75vh;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.15);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      object-fit: contain;
+      background: #000;
+    `;
 
-      const bar = document.createElement('div');
-      bar.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;justify-content:center';
+        // —— 提示文字
+        const tip = document.createElement('div');
+        tip.textContent = '📸 长按图片可保存或分享';
+        tip.style.cssText = `
+      color: #e5e7eb;
+      font-size: 15px;
+      margin-top: 12px;
+      text-align: center;
+    `;
 
-      function mkBtn(text) {
-        const b = document.createElement('button');
-        b.textContent = text;
-        b.style.cssText = 'padding:9px 14px;border-radius:10px;background:#111827;color:#e5e7eb;border:1px solid #374151';
-        return b;
-      }
+        // —— 按钮栏
+        const bar = document.createElement('div');
+        bar.style.cssText = `
+      margin-top: 14px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    `;
 
-      // 可选：复制图片到剪贴板（部分浏览器支持）
-      const btnCopy = mkBtn('复制图片');
-      btnCopy.onclick = async () => {
-        try {
-          if (navigator.clipboard && window.ClipboardItem) {
-            const blob = typeof blobOrUrl === 'string' ? await (await fetch(blobOrUrl)).blob() : blobOrUrl;
-            await navigator.clipboard.write([new ClipboardItem({ [blob.type || 'image/png']: blob })]);
-            tip.textContent = '已复制到剪贴板';
-          } else {
-            tip.textContent = '当前浏览器不支持复制图片';
+        // 通用按钮样式
+        const mkBtn = (text) => {
+          const b = document.createElement('button');
+          b.textContent = text;
+          b.style.cssText = `
+        padding: 10px 18px;
+        border-radius: 8px;
+        background: rgba(255,255,255,0.12);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.2);
+        font-size: 14px;
+        backdrop-filter: blur(2px);
+      `;
+          return b;
+        };
+
+        // —— “复制图片”按钮（部分浏览器支持）
+        const btnCopy = mkBtn('复制图片');
+        btnCopy.onclick = async () => {
+          try {
+            if (navigator.clipboard && window.ClipboardItem) {
+              const blob = typeof blobOrUrl === 'string'
+                ? await (await fetch(blobOrUrl)).blob()
+                : blobOrUrl;
+              await navigator.clipboard.write([new ClipboardItem({ [blob.type || 'image/png']: blob })]);
+              tip.textContent = '✅ 已复制到剪贴板';
+            } else {
+              tip.textContent = '❌ 当前浏览器不支持复制图片';
+            }
+          } catch {
+            tip.textContent = '❌ 复制失败';
           }
-        } catch { tip.textContent = '复制失败'; }
-      };
+        };
 
-      const btnClose = mkBtn('关闭');
-      btnClose.onclick = () => {
-        overlay.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-      };
+        // —— “关闭”按钮
+        const btnClose = mkBtn('关闭');
+        btnClose.onclick = () => {
+          overlay.remove();
+          try { URL.revokeObjectURL(url); } catch { }
+        };
 
-      bar.append(btnCopy, btnClose);
-      overlay.append(img, tip, bar);
-      document.body.appendChild(overlay);
+        // —— 按钮栏组装
+        bar.append(btnCopy, btnClose);
+
+        // —— 组装所有元素
+        overlay.append(img, tip, bar);
+        document.body.appendChild(overlay);
+
+        // —— 阻止背景滚动（移动端必要）
+        document.body.style.overflow = 'hidden';
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) btnClose.click();
+        });
+
+        // —— 在图片加载完后滚动到顶部，确保弹窗在视野内
+        img.onload = () => window.scrollTo({ top: 0 });
+
+      } catch (e) {
+        console.error('openImagePreviewModal error', e);
+      }
     }
+
 
     function cardType(translationHtml) { const c = imgsFrom(translationHtml).length; return c === 0 ? 'text' : (c === 1 ? 'single' : 'multi'); }
 
