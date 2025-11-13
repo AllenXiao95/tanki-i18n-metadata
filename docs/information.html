@@ -402,6 +402,41 @@
 
       root.querySelectorAll('a[href]').forEach(a => { a.target = '_blank'; a.rel = 'noopener noreferrer nofollow'; });
     }
+    function canvasToBlob(canvas) {
+      return new Promise((resolve, reject) => {
+        // 兼容 iOS 某些版本无 toBlob：用 dataURL 转 blob
+        if (canvas.toBlob) {
+          canvas.toBlob(b => b ? resolve(b) : reject(new Error('toBlob failed')), 'image/png');
+        } else {
+          try {
+            const dataURL = canvas.toDataURL('image/png');
+            const byteString = atob(dataURL.split(',')[1]);
+            const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+            resolve(new Blob([ab], { type: mimeString }));
+          } catch (e) { reject(e); }
+        }
+      });
+    }
+    function canvasToBlob(canvas) {
+      return new Promise((resolve, reject) => {
+        if (canvas.toBlob) {
+          canvas.toBlob(b => b ? resolve(b) : reject(new Error('toBlob failed')), 'image/png');
+        } else {
+          try {
+            const dataURL = canvas.toDataURL('image/png');
+            const byteString = atob(dataURL.split(',')[1]);
+            const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+            resolve(new Blob([ab], { type: mimeString }));
+          } catch (e) { reject(e); }
+        }
+      });
+    }
     function cardType(translationHtml) { const c = imgsFrom(translationHtml).length; return c === 0 ? 'text' : (c === 1 ? 'single' : 'multi'); }
 
     /** ===== 请求 ===== */
@@ -579,9 +614,11 @@
       });
 
       // —— 分享按钮：展开后截图 + 水印
+      const isMobile = /mobile|android|iphone|ipad|ipod/i.test(navigator.userAgent);
       shareBtn.addEventListener('click', async () => {
+        let blob, url;
         try {
-          // 若未展开，先展开一次
+          // 1) 未展开则展开并 hydrate
           if (content.dataset.open !== "true") {
             if (!content.__hydrated) {
               const html = dehtml(item.translation || '');
@@ -593,22 +630,15 @@
             thumbs.classList.add('hidden');
           }
 
-          card.classList.add('sharing');
-          // ——确保正文图片不会被占位比例拉伸 & 等图片加载完
-          const imgsInContent = Array.from(content.querySelectorAll('img'));
-          imgsInContent.forEach(im => {
-            // 移除任何占位比例，避免被强制 16:9
-            im.style.removeProperty('aspect-ratio');
-          });
+          // 2) 分享态：隐藏底栏
+          card.classList.add('sharing'); // .sharing .hide-on-share { display:none!important; }
 
-          // 等待所有图片加载完成（包括已缓存 complete=true 的）
-          await Promise.all(
-            imgsInContent.map(im => new Promise(res => {
-              if (im.complete) return res();
-              im.onload = im.onerror = () => res();
-            }))
-          );
+          // 3) 等正文图片加载完，并移除占位比例
+          const imgs = Array.from(content.querySelectorAll('img'));
+          imgs.forEach(im => im.style.removeProperty('aspect-ratio'));
+          await Promise.all(imgs.map(im => new Promise(r => (im.complete ? r() : (im.onload = im.onerror = () => r())))));
 
+          // 4) 截图
           const canvas = await html2canvas(card, {
             backgroundColor: "#ffffff",
             scale: window.devicePixelRatio < 2 ? 2 : 1.5,
@@ -616,6 +646,7 @@
             allowTaint: false
           });
 
+          // 5) 叠底色 + 水印
           const out = document.createElement('canvas');
           out.width = canvas.width; out.height = canvas.height;
           const ctx = out.getContext('2d');
@@ -623,22 +654,39 @@
           ctx.drawImage(canvas, 0, 0);
           drawWatermark(out, 'tanki.onlyax.com');
 
-          out.toBlob(blob => {
-            const a = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            a.href = url; a.download = `tanki-${item.id}.png`;
-            document.body.appendChild(a); a.click(); a.remove();
-            URL.revokeObjectURL(url);
-          }, 'image/png');
+          // 6) 生成 Blob
+          blob = await canvasToBlob(out);
+          const fileName = `tanki-${item.id}.png`;
 
+          if (!isMobile) {
+            // —— PC 端：直接下载
+            url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            showToast('已开始下载');
+          } else {
+            // —— 移动端：原生分享优先，不支持则预览
+            const file = new File([blob], fileName, { type: 'image/png' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              await navigator.share({ files: [file], title: 'Tanki 在线资讯', text: item.summary || '' });
+            } else {
+              url = URL.createObjectURL(blob);
+              window.open(url, '_blank');
+              showToast('已打开图片，长按保存');
+            }
+          }
         } catch (e) {
           console.error(e);
-          showToast('分享图片生成失败');
+          showToast('分享失败，请重试');
         } finally {
-          // 恢复
           card.classList.remove('sharing');
+          if (url) setTimeout(() => URL.revokeObjectURL(url), 5000);
         }
       });
+
 
       // 组装卡片
       card.append(head, sum, thumbs, content, foot);
