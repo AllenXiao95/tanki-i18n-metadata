@@ -1,10 +1,12 @@
 <!doctype html>
 <html lang="zh-CN" data-theme="dark" class="h-full">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="description" content="2025 最新《坦克世界》俄服 (Lesta) 最新资讯" />
-  <meta name="keywords" content="坦克世界, 坦克世界俄服, World of Tanks, WoT RU, WoT Lesta, 最新资讯, 最新, 坦克世界 俄服 资讯, Lesta 服, 俄服 资讯, 坦克世界 俄服 资讯, 资讯, 坦克世界中文资讯, 坦克世界俄服资讯, WoT 俄服 资讯, WoT 俄服 最新资讯, 坦克世界 俄服 资讯, 坦克世界 俄服 资讯, worldoftanks 中文资讯" />
+  <meta name="keywords"
+    content="坦克世界, 坦克世界俄服, World of Tanks, WoT RU, WoT Lesta, 最新资讯, 最新, 坦克世界 俄服 资讯, Lesta 服, 俄服 资讯, 坦克世界 俄服 资讯, 资讯, 坦克世界中文资讯, 坦克世界俄服资讯, WoT 俄服 资讯, WoT 俄服 最新资讯, 坦克世界 俄服 资讯, 坦克世界 俄服 资讯, worldoftanks 中文资讯" />
   <meta name="author" content="Allen.Xiao" />
   <meta name="robots" content="information, follow" />
 
@@ -52,33 +54,109 @@
   </script>
 
   <style>
-    :root { --sticky-header: 64px; }
+    :root {
+      --sticky-header: 64px;
+    }
 
     @keyframes fadein {
-      0% { opacity: 0; transform: translate(-50%, -4px) }
-      100% { opacity: 1; transform: translate(-50%, 0) }
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -4px)
+      }
+
+      100% {
+        opacity: 1;
+        transform: translate(-50%, 0)
+      }
     }
-    .animate-fadein { animation: fadein .25s both }
 
-    body { background: #0b1220; color: #e5e7eb; }
-    article { scroll-margin-top: calc(var(--sticky-header) + 8px); }
-    .collapsible { display: none; opacity: 0; transition: opacity .22s ease; }
-    .collapsible[data-open="true"] { display: block; opacity: 1; }
-    .card-animating { overflow: hidden; }
-    .thumbs-hold { visibility: hidden; }
+    .animate-fadein {
+      animation: fadein .25s both
+    }
 
-    .rich { color: #e5e7eb; white-space: pre-line; line-height: 1.65; }
-    .rich :where(p,li,span,h1,h2,h3,h4,h5,h6,blockquote,strong,em,code){ color: inherit!important; }
-    .rich a { color: #93c5fd; text-decoration: underline; }
-    .rich img { max-width: 100%; height: auto; display: block; margin: .5rem 0; border-radius: .75rem; border: 1px solid rgba(30, 41, 59, .7); }
-    .rich p>img:first-child{ margin-top:0; } .rich p>img:last-child{ margin-bottom:0; }
-    .rich table{ width:100%; border-collapse:collapse; margin:.5rem 0; }
-    .rich th,.rich td{ border:1px solid rgba(30,41,59,.7); padding:.5rem; }
-    .rich pre,.rich code{ background: rgba(2,6,23,.5); border-radius:.5rem; padding:.25rem .4rem; }
+    body {
+      background: #0b1220;
+      color: #e5e7eb;
+    }
+
+    article {
+      scroll-margin-top: calc(var(--sticky-header) + 8px);
+    }
+
+    .collapsible {
+      display: none;
+      opacity: 0;
+      transition: opacity .22s ease;
+    }
+
+    .collapsible[data-open="true"] {
+      display: block;
+      opacity: 1;
+    }
+
+    .card-animating {
+      overflow: hidden;
+    }
+
+    .thumbs-hold {
+      visibility: hidden;
+    }
+
+    .rich {
+      color: #e5e7eb;
+      white-space: pre-line;
+      line-height: 1.65;
+    }
+
+    .rich :where(p, li, span, h1, h2, h3, h4, h5, h6, blockquote, strong, em, code) {
+      color: inherit !important;
+    }
+
+    .rich a {
+      color: #93c5fd;
+      text-decoration: underline;
+    }
+
+    .rich img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: .5rem 0;
+      border-radius: .75rem;
+      border: 1px solid rgba(30, 41, 59, .7);
+    }
+
+    .rich p>img:first-child {
+      margin-top: 0;
+    }
+
+    .rich p>img:last-child {
+      margin-bottom: 0;
+    }
+
+    .rich table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: .5rem 0;
+    }
+
+    .rich th,
+    .rich td {
+      border: 1px solid rgba(30, 41, 59, .7);
+      padding: .5rem;
+    }
+
+    .rich pre,
+    .rich code {
+      background: rgba(2, 6, 23, .5);
+      border-radius: .5rem;
+      padding: .25rem .4rem;
+    }
 
     /* 统一多图缩略图比例，避免错位 */
-    .thumb-grid img{
-      aspect-ratio: 4 / 3;      /* 需要 16/9 自改 */
+    .thumb-grid img {
+      aspect-ratio: 4 / 3;
+      /* 需要 16/9 自改 */
       width: 100%;
       height: auto;
       object-fit: cover;
@@ -87,20 +165,84 @@
     }
 
     /* Light 主题覆盖 */
-    html[data-theme="light"] body { background:#f8fafc!important; color:#0f172a!important; }
-    html[data-theme="light"] header { background-color:#ffffffc4!important; backdrop-filter:saturate(1.2) blur(8px)!important; border-bottom-color:#e2e8f0!important; }
-    html[data-theme="light"] article { background:#ffffffcc!important; border-color:#e2e8f0!important; }
-    html[data-theme="light"] article:hover { background:#ffffff!important; border-color:#cbd5e1!important; }
-    html[data-theme="light"] .rich { color:#1f2937!important; }
-    html[data-theme="light"] .rich a { color:#2563eb!important; }
-    html[data-theme="light"] .rich img { border-color:#e2e8f0!important; }
-    html[data-theme="light"] .rich th, .rich td { border-color:#e2e8f0!important; }
-    html[data-theme="light"] .rich pre, .rich code { background:#f1f5f9!important; color:#0f172a!important; }
-    html[data-theme="light"] .soft-btn { background:#f8fafc!important; border-color:#e2e8f0!important; color:#0f172a!important; }
-    html[data-theme="light"] .soft-btn:hover { background:#ffffff!important; border-color:#cbd5e1!important; }
-    html[data-theme="light"] #toTop { background:#ffffff!important; border-color:#e2e8f0!important; color:#0f172a!important; box-shadow:0 8px 20px rgba(2,6,23,.08)!important; }
-    html[data-theme="light"] #loadState { color:#64748b!important; }
-    html[data-theme="light"] .border-slate-800\/70 { border-color:#e2e8f0!important; }
+    html[data-theme="light"] body {
+      background: #f8fafc !important;
+      color: #0f172a !important;
+    }
+
+    html[data-theme="light"] header {
+      background-color: #ffffffc4 !important;
+      backdrop-filter: saturate(1.2) blur(8px) !important;
+      border-bottom-color: #e2e8f0 !important;
+    }
+
+    html[data-theme="light"] article {
+      background: #ffffffcc !important;
+      border-color: #e2e8f0 !important;
+    }
+
+    html[data-theme="light"] article:hover {
+      background: #ffffff !important;
+      border-color: #cbd5e1 !important;
+    }
+
+    html[data-theme="light"] .rich {
+      color: #1f2937 !important;
+    }
+
+    html[data-theme="light"] .rich a {
+      color: #2563eb !important;
+    }
+
+    html[data-theme="light"] .rich img {
+      border-color: #e2e8f0 !important;
+    }
+
+    html[data-theme="light"] .rich th,
+    .rich td {
+      border-color: #e2e8f0 !important;
+    }
+
+    html[data-theme="light"] .rich pre,
+    .rich code {
+      background: #f1f5f9 !important;
+      color: #0f172a !important;
+    }
+
+    html[data-theme="light"] .soft-btn {
+      background: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+      color: #0f172a !important;
+    }
+
+    html[data-theme="light"] .soft-btn:hover {
+      background: #ffffff !important;
+      border-color: #cbd5e1 !important;
+    }
+
+    html[data-theme="light"] #toTop {
+      background: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      color: #0f172a !important;
+      box-shadow: 0 8px 20px rgba(2, 6, 23, .08) !important;
+    }
+
+    html[data-theme="light"] #loadState {
+      color: #64748b !important;
+    }
+
+    html[data-theme="light"] .border-slate-800\/70 {
+      border-color: #e2e8f0 !important;
+    }
+
+    /* 截图期间隐藏的元素统一加这个类 */
+    .hide-on-share {
+      display: initial;
+    }
+
+    .sharing .hide-on-share {
+      display: none !important;
+    }
   </style>
 </head>
 
@@ -108,7 +250,8 @@
   <!-- 顶部 -->
   <header class="sticky top-0 z-50 backdrop-blur-md bg-slate-900/70 border-b border-slate-800/70">
     <div class="mx-auto max-w-3xl px-4 py-3 flex items-center gap-3">
-      <div class="size-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 shadow-glass grid place-content-center">
+      <div
+        class="size-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 shadow-glass grid place-content-center">
         <span class="text-white font-black">i</span>
       </div>
       <h1 class="text-lg font-semibold tracking-wide">Tanki在线资讯流</h1>
@@ -118,7 +261,8 @@
           class="soft-btn inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-slate-700/70 bg-slate-800/60 hover:bg-slate-800 text-slate-200 text-sm transition"
           title="切换浅色/深色">
           <svg id="themeIcon" class="size-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M12 4v2m0 12v2m8-8h-2M6 12H4m12.95 5.657l-1.414-1.414M8.464 8.464 7.05 7.05m10.607 0-1.414 1.414M8.464 15.536 7.05 16.95"
+            <path
+              d="M12 4v2m0 12v2m8-8h-2M6 12H4m12.95 5.657l-1.414-1.414M8.464 8.464 7.05 7.05m10.607 0-1.414 1.414M8.464 15.536 7.05 16.95"
               stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
             <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" />
           </svg>
@@ -130,7 +274,8 @@
           class="soft-btn hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-slate-700/70 bg-slate-800/60 hover:bg-slate-800 text-slate-200 text-sm transition">
           <svg class="size-4" viewBox="0 0 24 24" fill="none">
             <path d="M4 4v6h6M20 20v-6h-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-            <path d="M20 8a 8 8 0 0 0-14.9-3M4 16a 8 8 0 0 0 14.9 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <path d="M20 8a 8 8 0 0 0-14.9-3M4 16a 8 8 0 0 0 14.9 3" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" />
           </svg>
           手动刷新
         </button>
@@ -216,7 +361,7 @@
     const chipStyle = name => { const hue = hashHue(name); return `background-color:hsl(${hue} 60% 22% / .55);border-color:hsl(${hue} 70% 55% / .5);color:hsl(${hue} 90% 85%);`; };
 
     function dehtml(str = '') { if (!/[<&]/.test(str)) return str; const t = document.createElement('textarea'); t.innerHTML = str; const out = t.value; if (out.includes('&lt;') || out.includes('&gt;')) { t.innerHTML = out; return t.value; } return out; }
-    function fixLazyImage(el) { const cands = ['data-src','data-original','data-actualsrc','data-url','data-lazy-src','data-img','data-href']; for (const k of cands) { const v = el.getAttribute(k); if (v && !el.getAttribute('src')) { el.setAttribute('src', v); break; } } }
+    function fixLazyImage(el) { const cands = ['data-src', 'data-original', 'data-actualsrc', 'data-url', 'data-lazy-src', 'data-img', 'data-href']; for (const k of cands) { const v = el.getAttribute(k); if (v && !el.getAttribute('src')) { el.setAttribute('src', v); break; } } }
     function imgsFrom(html) { const wrap = document.createElement('div'); wrap.innerHTML = dehtml(html || ''); wrap.querySelectorAll('img').forEach(fixLazyImage); return Array.from(wrap.querySelectorAll('img')).map(i => i.getAttribute('src')).filter(Boolean); }
     function preload(srcList) { return Promise.all((srcList || []).map(src => new Promise(res => { const im = new Image(); im.referrerPolicy = 'no-referrer'; im.decoding = 'async'; im.loading = 'eager'; im.onload = im.onerror = () => res(); im.src = src; }))); }
     function sanitizeAndHydrate(root) {
@@ -234,6 +379,27 @@
         img.referrerPolicy = 'no-referrer'; img.loading = 'lazy'; img.decoding = 'async';
         if (!img.getAttribute('width') || !img.getAttribute('height')) { img.style.aspectRatio = '16/9'; img.addEventListener('load', () => { img.style.aspectRatio = ''; }, { once: true }); }
       });
+
+      // 只在“缩略图”里做占位，正文图片不做 16:9 拉伸
+      root.querySelectorAll('img').forEach(img => {
+        fixLazyImage(img);
+        img.referrerPolicy = 'no-referrer';
+        img.loading = 'lazy';
+        img.decoding = 'async';
+
+        // 正文图片不设 aspect-ratio，以免失真
+        img.style.removeProperty('aspect-ratio');
+
+        // 若你仍想在缩略图网格里统一比例，请对 .thumb-grid 下的图片单独处理
+        if (img.closest('.thumb-grid')) {
+          if (!img.getAttribute('width') || !img.getAttribute('height')) {
+            img.style.aspectRatio = '4/3';        // 仅缩略图
+            img.style.objectFit = 'cover';
+            img.addEventListener('load', () => { img.style.aspectRatio = ''; }, { once: true });
+          }
+        }
+      });
+
       root.querySelectorAll('a[href]').forEach(a => { a.target = '_blank'; a.rel = 'noopener noreferrer nofollow'; });
     }
     function cardType(translationHtml) { const c = imgsFrom(translationHtml).length; return c === 0 ? 'text' : (c === 1 ? 'single' : 'multi'); }
@@ -272,9 +438,9 @@
 
       const step = fontSize * 8;
       for (let y = -height; y <= height; y += step) {
-          for (let x = -width; x <= width; x += step * 2) {
-            ctx.fillText(text, x, y);
-          }
+        for (let x = -width; x <= width; x += step * 2) {
+          ctx.fillText(text, x, y);
+        }
       }
 
       ctx.restore();
@@ -294,7 +460,7 @@
       // 头
       const head = document.createElement('div'); head.className = "flex items-center gap-3 px-4 pt-4";
       const chip = document.createElement('span');
-      chip.className = "inline-flex items-center gap-2 px-2.5 py-1 rounded-full border text-xs font-semibold";
+      chip.className = "inline-flex items-center gap-2 px-2.5 py-1 rounded-full border text-xs font-semibold hide-on-share";
       chip.style = chipStyle(item.chat_username || 'unknown');
       chip.innerHTML = `<span class="inline-block size-1.5 rounded-full bg-current/70"></span>${item.chat_username || 'unknown'}`;
       const meta = document.createElement('span'); meta.className = "ml-auto text-xs text-slate-400"; meta.textContent = fmt(item.date);
@@ -331,7 +497,7 @@
       const content = document.createElement('div'); content.className = "collapsible px-4 pb-4 pt-2 rich"; content.dataset.open = "false";
 
       // 底部按钮
-      const foot = document.createElement('div'); foot.className = "flex items-center justify-between gap-3 px-4 py-3 border-t border-slate-800/70";
+      const foot = document.createElement('div'); foot.className = "flex items-center justify-between gap-3 px-4 py-3 border-t border-slate-800/70 hide-on-share";
       const left = document.createElement('span'); left.className = "text-xs text-slate-400"; left.textContent = `#${item.id}・${item.chat_username}`;
 
       // 分享
@@ -427,8 +593,24 @@
             thumbs.classList.add('hidden');
           }
 
+          card.classList.add('sharing');
+          // ——确保正文图片不会被占位比例拉伸 & 等图片加载完
+          const imgsInContent = Array.from(content.querySelectorAll('img'));
+          imgsInContent.forEach(im => {
+            // 移除任何占位比例，避免被强制 16:9
+            im.style.removeProperty('aspect-ratio');
+          });
+
+          // 等待所有图片加载完成（包括已缓存 complete=true 的）
+          await Promise.all(
+            imgsInContent.map(im => new Promise(res => {
+              if (im.complete) return res();
+              im.onload = im.onerror = () => res();
+            }))
+          );
+
           const canvas = await html2canvas(card, {
-            backgroundColor: null,
+            backgroundColor: "#ffffff",
             scale: window.devicePixelRatio < 2 ? 2 : 1.5,
             useCORS: true,
             allowTaint: false
@@ -452,6 +634,9 @@
         } catch (e) {
           console.error(e);
           showToast('分享图片生成失败');
+        } finally {
+          // 恢复
+          card.classList.remove('sharing');
         }
       });
 
@@ -559,4 +744,5 @@
     })();
   </script>
 </body>
+
 </html>
