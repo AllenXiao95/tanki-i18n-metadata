@@ -402,24 +402,10 @@
 
       root.querySelectorAll('a[href]').forEach(a => { a.target = '_blank'; a.rel = 'noopener noreferrer nofollow'; });
     }
-    function canvasToBlob(canvas) {
-      return new Promise((resolve, reject) => {
-        // 兼容 iOS 某些版本无 toBlob：用 dataURL 转 blob
-        if (canvas.toBlob) {
-          canvas.toBlob(b => b ? resolve(b) : reject(new Error('toBlob failed')), 'image/png');
-        } else {
-          try {
-            const dataURL = canvas.toDataURL('image/png');
-            const byteString = atob(dataURL.split(',')[1]);
-            const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
-            const ab = new ArrayBuffer(byteString.length);
-            const ia = new Uint8Array(ab);
-            for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
-            resolve(new Blob([ab], { type: mimeString }));
-          } catch (e) { reject(e); }
-        }
-      });
-    }
+    // 判断是否移动端（含 iPhone/iPad/Android 等）
+    const isMobile = /mobile|android|iphone|ipad|ipod/i.test(navigator.userAgent);
+
+    // canvas → Blob（兼容老 iOS 无 toBlob）
     function canvasToBlob(canvas) {
       return new Promise((resolve, reject) => {
         if (canvas.toBlob) {
@@ -437,6 +423,61 @@
         }
       });
     }
+
+    // 简单的预览弹窗（移动端）：长按图片保存/分享
+    function openImagePreviewModal(blobOrUrl, filename = 'image.png') {
+      const url = typeof blobOrUrl === 'string' ? blobOrUrl : URL.createObjectURL(blobOrUrl);
+
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+    position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.86);
+    display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;padding:16px;
+  `;
+
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = filename;
+      img.style.cssText = 'max-width:92vw;max-height:70vh;border-radius:12px;border:1px solid rgba(255,255,255,.12)';
+
+      const tip = document.createElement('div');
+      tip.textContent = '长按图片可保存/分享';
+      tip.style.cssText = 'color:#cbd5e1;font-size:13px;text-align:center';
+
+      const bar = document.createElement('div');
+      bar.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;justify-content:center';
+
+      function mkBtn(text) {
+        const b = document.createElement('button');
+        b.textContent = text;
+        b.style.cssText = 'padding:9px 14px;border-radius:10px;background:#111827;color:#e5e7eb;border:1px solid #374151';
+        return b;
+      }
+
+      // 可选：复制图片到剪贴板（部分浏览器支持）
+      const btnCopy = mkBtn('复制图片');
+      btnCopy.onclick = async () => {
+        try {
+          if (navigator.clipboard && window.ClipboardItem) {
+            const blob = typeof blobOrUrl === 'string' ? await (await fetch(blobOrUrl)).blob() : blobOrUrl;
+            await navigator.clipboard.write([new ClipboardItem({ [blob.type || 'image/png']: blob })]);
+            tip.textContent = '已复制到剪贴板';
+          } else {
+            tip.textContent = '当前浏览器不支持复制图片';
+          }
+        } catch { tip.textContent = '复制失败'; }
+      };
+
+      const btnClose = mkBtn('关闭');
+      btnClose.onclick = () => {
+        overlay.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      };
+
+      bar.append(btnCopy, btnClose);
+      overlay.append(img, tip, bar);
+      document.body.appendChild(overlay);
+    }
+
     function cardType(translationHtml) { const c = imgsFrom(translationHtml).length; return c === 0 ? 'text' : (c === 1 ? 'single' : 'multi'); }
 
     /** ===== 请求 ===== */
@@ -614,11 +655,10 @@
       });
 
       // —— 分享按钮：展开后截图 + 水印
-      const isMobile = /mobile|android|iphone|ipad|ipod/i.test(navigator.userAgent);
       shareBtn.addEventListener('click', async () => {
         let blob, url;
         try {
-          // 1) 未展开则展开并 hydrate
+          // ——若未展开，先展开并 hydrate 正文
           if (content.dataset.open !== "true") {
             if (!content.__hydrated) {
               const html = dehtml(item.translation || '');
@@ -630,15 +670,15 @@
             thumbs.classList.add('hidden');
           }
 
-          // 2) 分享态：隐藏底栏
+          // ——进入分享态：隐藏底部按钮等
           card.classList.add('sharing'); // .sharing .hide-on-share { display:none!important; }
 
-          // 3) 等正文图片加载完，并移除占位比例
+          // ——确保正文图片加载完，并移除任何占位比例，避免拉伸
           const imgs = Array.from(content.querySelectorAll('img'));
           imgs.forEach(im => im.style.removeProperty('aspect-ratio'));
           await Promise.all(imgs.map(im => new Promise(r => (im.complete ? r() : (im.onload = im.onerror = () => r())))));
 
-          // 4) 截图
+          // ——截图
           const canvas = await html2canvas(card, {
             backgroundColor: "#ffffff",
             scale: window.devicePixelRatio < 2 ? 2 : 1.5,
@@ -646,20 +686,24 @@
             allowTaint: false
           });
 
-          // 5) 叠底色 + 水印
+          // ——叠底色 + 水印
           const out = document.createElement('canvas');
           out.width = canvas.width; out.height = canvas.height;
           const ctx = out.getContext('2d');
-          ctx.fillStyle = '#0b1220'; ctx.fillRect(0, 0, out.width, out.height);
+          ctx.fillStyle = '#0b1220';
+          ctx.fillRect(0, 0, out.width, out.height);
           ctx.drawImage(canvas, 0, 0);
           drawWatermark(out, 'tanki.onlyax.com');
 
-          // 6) 生成 Blob
+          // ——生成 Blob
           blob = await canvasToBlob(out);
           const fileName = `tanki-${item.id}.png`;
 
-          if (!isMobile) {
-            // —— PC 端：直接下载
+          if (isMobile) {
+            // 【移动端方案】：弹窗预览，用户长按保存/分享
+            openImagePreviewModal(blob, fileName);
+          } else {
+            // 【PC 方案】：直接下载
             url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url; a.download = fileName;
@@ -667,26 +711,17 @@
             a.click();
             a.remove();
             showToast('已开始下载');
-          } else {
-            // —— 移动端：原生分享优先，不支持则预览
-            const file = new File([blob], fileName, { type: 'image/png' });
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-              await navigator.share({ files: [file], title: 'Tanki 在线资讯', text: item.summary || '' });
-            } else {
-              url = URL.createObjectURL(blob);
-              window.open(url, '_blank');
-              showToast('已打开图片，长按保存');
-            }
           }
+
         } catch (e) {
           console.error(e);
           showToast('分享失败，请重试');
         } finally {
+          // ——总是恢复界面
           card.classList.remove('sharing');
           if (url) setTimeout(() => URL.revokeObjectURL(url), 5000);
         }
       });
-
 
       // 组装卡片
       card.append(head, sum, thumbs, content, foot);
