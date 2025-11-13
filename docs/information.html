@@ -402,9 +402,6 @@
 
       root.querySelectorAll('a[href]').forEach(a => { a.target = '_blank'; a.rel = 'noopener noreferrer nofollow'; });
     }
-    // 判断是否移动端（含 iPhone/iPad/Android 等）
-    const isMobile = /mobile|android|iphone|ipad|ipod/i.test(navigator.userAgent);
-
     // canvas → Blob（兼容老 iOS 无 toBlob）
     function canvasToBlob(canvas) {
       return new Promise((resolve, reject) => {
@@ -695,24 +692,9 @@
           ctx.drawImage(canvas, 0, 0);
           drawWatermark(out, 'tanki.onlyax.com');
 
-          // ——生成 Blob
           blob = await canvasToBlob(out);
           const fileName = `tanki-${item.id}.png`;
-
-          if (isMobile) {
-            // 【移动端方案】：弹窗预览，用户长按保存/分享
-            openImagePreviewModal(blob, fileName);
-          } else {
-            // 【PC 方案】：直接下载
-            url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            showToast('已开始下载');
-          }
-
+          openImagePreviewModal(blob, fileName);
         } catch (e) {
           console.error(e);
           showToast('分享失败，请重试');
