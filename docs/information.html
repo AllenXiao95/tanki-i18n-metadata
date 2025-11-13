@@ -436,7 +436,7 @@
       const fontSize = Math.max(18, Math.floor(Math.min(width, height) / 25));
       ctx.font = `${fontSize}px sans-serif`;
 
-      const step = fontSize * 8;
+      const step = fontSize * 6;
       for (let y = -height; y <= height; y += step) {
         for (let x = -width; x <= width; x += step * 2) {
           ctx.fillText(text, x, y);
