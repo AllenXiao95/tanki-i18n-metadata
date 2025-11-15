@@ -355,7 +355,7 @@
     const $ = (s, el = document) => el.querySelector(s);
     const listEl = $('#list'), bannerEl = $('#newBanner'), sentinelEl = $('#sentinel'), loadStateEl = $('#loadState'), toTopEl = $('#toTop');
 
-    const fmt = iso => { if (!iso) return ''; const d = new Date(iso), pad = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+    const fmt = iso => { if (!iso) return ''; const d = new Date(new Date(iso).getTime() + 8 * 3600 * 1000), pad = n => String(n).padStart(2, '0'); return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`; };
     const isToday = iso => { const d = new Date(iso), n = new Date(); return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && d.getDate() === n.getDate(); };
     const hashHue = (str = 'x') => { let h = 0; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0; return h % 360; };
     const chipStyle = name => { const hue = hashHue(name); return `background-color:hsl(${hue} 60% 22% / .55);border-color:hsl(${hue} 70% 55% / .5);color:hsl(${hue} 90% 85%);`; };
@@ -464,7 +464,7 @@
       chip.className = "inline-flex items-center gap-2 px-2.5 py-1 rounded-full border text-xs font-semibold hide-on-share";
       chip.style = chipStyle(item.chat_username || 'unknown');
       chip.innerHTML = `<span class="inline-block size-1.5 rounded-full bg-current/70"></span>${item.chat_username || 'unknown'}`;
-      const meta = document.createElement('span'); meta.className = "ml-auto text-xs text-slate-400"; meta.textContent = fmt(item.date);
+      const meta = document.createElement('span'); meta.className = "ml-auto text-xs text-slate-400"; meta.textContent = fmt(item.create_time);
       head.append(chip, meta);
 
       // summary
