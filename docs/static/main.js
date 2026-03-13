@@ -152,6 +152,12 @@ function openBox() {
 }
 window.openBox = openBox;
 
+/* ---------- 战舰汉化（全局暴露） ---------- */
+function openShip() {
+    window.open('https://localizedkorabli.org', '_blank');
+}
+window.openShip = openShip;
+
 /* 背景点击 & ESC 关闭重置弹窗 */
 (function resetModalBinders() {
   if (!_resetModal) return;
