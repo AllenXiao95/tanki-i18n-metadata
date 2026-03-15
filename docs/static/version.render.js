@@ -31,7 +31,7 @@
   }
 
   try {
-    const res = await fetch('https://get-releases.geekxl.workers.dev/');
+    const res = await fetch('https://get-release.onlyax.com/');
     const data = await res.json();
 
     let latestRu = null;
