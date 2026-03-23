@@ -127,6 +127,7 @@ function renderWaterfall(skins) {
         } catch (e) { console.error('解析错误', e); }
 
         const card = document.createElement('div');
+        const fallbackImg = '/fallback.jpg';
         card.className = 'skin-card';
 
         // 如果是管理员模式，注入编辑和删除按钮
@@ -142,14 +143,22 @@ function renderWaterfall(skins) {
         }
 
         card.innerHTML = `
-      <img src="${coverImg}" loading="lazy" class="cover-img" alt="${skin.tank_model}" />
-      <div class="card-info">
-        <h3>${skin.tank_model} <span class="tier-tag">${getRomanTier(skin.tier)}</span></h3>
-        <button class="download-btn">获取涂装</button>
-        ${adminHtml}
-      </div>
-    `;
-
+            <div class="img-wrapper">
+                <img 
+                src="${coverImg}" 
+                loading="lazy" 
+                class="cover-img" 
+                alt="${skin.tank_model}" 
+                onload="this.classList.add('loaded')" 
+                onerror="this.src='/fallback.jpg'; this.classList.add('loaded');"
+                />
+            </div>
+            <div class="card-info">
+                <h3>${skin.tank_model} <span class="tier-tag">${getRomanTier(skin.tier)}</span></h3>
+                <button class="download-btn">获取涂装</button>
+                ${adminHtml}
+            </div>
+        `;
         // 绑定下载事件
         const btn = card.querySelector('.download-btn');
         btn.addEventListener('click', () => handleDownload(downloads));
