@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesta西包菠萝蜜精选涂装库</title>
+    <link rel="stylesheet" href="skin.min.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div class="brand">
+                <img src="static/skin_avatar.webp" alt="西包菠萝蜜" class="avatar" />
+                <h1>Lesta · 西包菠萝蜜 · 精选涂装库</h1>
+            </div>
+            <div id="adminBadge" class="admin-badge" style="display: none;">管理员模式</div>
+        </header>
+
+        <main class="main-content">
+            <section id="uploadSection" class="upload-section" style="display: none;">
+                <h2>上传新涂装</h2>
+                <form id="uploadForm" class="upload-form">
+                    <div class="form-row">
+                        <input type="text" id="tankModel" placeholder="车型 (例: 查狄伦 25t)" required />
+                        <input type="number" id="tankTier" placeholder="等级 (1-11)" min="1" max="11" required />
+                    </div>
+                    <div class="form-row">
+                        <input type="file" id="skinFile" accept="image/*" required />
+                    </div>
+                    <div class="form-row">
+                        <input type="url" id="lanzouUrl" placeholder="蓝奏云链接" required />
+                        <input type="text" id="lanzouPwd" placeholder="提取密码 (选填)" />
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" id="submitBtn" class="submit-btn">发布涂装</button>
+                        <button type="button" id="cancelEditBtn" class="cancel-btn" style="display: none;">取消修改</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="filter-section">
+                <input type="text" id="searchInput" class="search-input" placeholder="搜索车型或风格 (例如: 暴风、3D)..." />
+                <select id="tierFilter" class="tier-select">
+                    <option value="all">所有等级</option>
+                    <option value="11">XI 级</option>
+                    <option value="10">X 级</option>
+                    <option value="9">IX 级</option>
+                    <option value="8">VIII 级</option>
+                    <option value="7-">VII 级及以下</option>
+                </select>
+            </section>
+
+            <section id="waterfallGrid" class="waterfall-grid">
+            </section>
+        </main>
+    </div>
+
+    <script src="skin.js"></script>
+</body>
+
+</html>

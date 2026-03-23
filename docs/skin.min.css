@@ -1,0 +1,49 @@
+body,html{background:#f4f6f8;margin:0;padding:0}
+.app-container{color:#333;font-family:system-ui,sans-serif;margin:0 auto;max-width:1200px;padding:20px}
+.header{border-bottom:2px solid #ddd;justify-content:space-between;margin-bottom:30px;padding-bottom:15px}
+.brand,.header{align-items:center;display:flex}
+.brand{gap:15px}
+.avatar{border-radius:50%;height:50px;object-fit:cover;width:50px}
+.admin-badge{background:#ff4757;border-radius:20px;color:#fff;font-size:.9rem;font-weight:700;padding:5px 12px}
+.upload-section{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05);margin-bottom:30px;padding:20px}
+.form-row{display:flex;gap:15px;margin-bottom:15px}
+.form-row input{border:1px solid #ccc;border-radius:8px;flex:1;font-size:1rem;padding:12px}
+.submit-btn{background:#2ed573;border:none;border-radius:8px;color:#fff;cursor:pointer;font-size:1rem;font-weight:700;padding:12px 24px}
+.submit-btn:disabled{cursor:not-allowed;opacity:.6}
+.waterfall-grid{column-count:2;column-gap:20px}
+@media (min-width:768px){.waterfall-grid{column-count:3}
+}
+@media (min-width:1024px){.waterfall-grid{column-count:4}
+}
+.skin-card{background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.08);break-inside:avoid;margin-bottom:20px;overflow:hidden;transition:transform .2s}
+.skin-card:hover{transform:translateY(-5px)}
+.cover-img{display:block;object-fit:cover;width:100%}
+.card-info{padding:15px}
+.card-info h3{align-items:flex-start;display:flex;font-size:1.1rem;gap:10px;justify-content:space-between;line-height:1.4;margin:0 0 15px}
+.tier-tag{background:#eccc68;border-radius:4px;color:#2f3542;flex-shrink:0;font-size:.85rem;font-weight:700;padding:3px 8px;white-space:nowrap}
+.download-btn{background:#1e90ff;border:none;border-radius:8px;color:#fff;cursor:pointer;font-weight:700;padding:12px;width:100%}
+.download-btn:hover{background:#1c82e6}
+.filter-section{display:flex;gap:15px;margin-bottom:25px}
+.search-input{border:1px solid #ddd;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,.02);flex:1;font-size:1rem;outline:0;padding:12px 18px;transition:all .2s}
+.search-input:focus{border-color:#1e90ff;box-shadow:0 0 0 3px rgba(30,144,255,.1)}
+.tier-select{background-color:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,.02);cursor:pointer;font-size:1rem;min-width:140px;outline:0;padding:12px 18px}
+.tier-select:focus{border-color:#1e90ff}
+@media (max-width:600px){.filter-section{flex-direction:column}
+}
+#toast-container{display:flex;flex-direction:column;gap:10px;left:50%;pointer-events:none;position:fixed;top:20px;transform:translateX(-50%);z-index:9999}
+.toast-msg{animation:toastIn .3s cubic-bezier(.175,.885,.32,1.275) forwards;background:rgba(45,52,54,.95);border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);color:#fff;font-size:.95rem;line-height:1.5;opacity:0;padding:12px 24px;text-align:center;transform:translateY(-20px)}
+@keyframes toastIn{to{opacity:1;transform:translateY(0)}
+}
+.toast-msg.fade-out{animation:toastOut .3s ease forwards}
+@keyframes toastOut{to{opacity:0;transform:translateY(-20px)}
+}
+.admin-actions{border-top:1px dashed #eee;display:flex;gap:10px;margin-top:10px;padding-top:10px}
+.delete-btn,.edit-btn{border:none;border-radius:6px;cursor:pointer;flex:1;font-size:.85rem;font-weight:700;padding:8px}
+.edit-btn{background-color:#f1f2f6;color:#2f3542}
+.delete-btn{background-color:#ff4757;color:#fff;opacity:.9}
+.edit-btn:hover{background-color:#dfe4ea}
+.delete-btn:hover{opacity:1}
+.form-actions{display:flex;gap:15px}
+.form-actions button{flex:1}
+.cancel-btn{background:#f1f2f6;border:none;border-radius:8px;color:#2f3542;cursor:pointer;font-size:1rem;font-weight:700;padding:12px 24px;transition:background .2s}
+.cancel-btn:hover{background:#dfe4ea}
