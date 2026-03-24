@@ -12,10 +12,13 @@
     <div class="app-container">
         <header class="header">
             <div class="brand">
-                <img src="static/skin_avatar.webp" alt="西包菠萝蜜" class="avatar" />
-                <h1>Lesta · 西包菠萝蜜 · 精选涂装库</h1>
+                <img src="avatar.jpg" alt="西包菠萝蜜" class="avatar" />
+                <h1>西包菠萝蜜 · Lesta 涂装库</h1>
             </div>
-            <div id="adminBadge" class="admin-badge" style="display: none;">管理员模式</div>
+            <div class="header-actions">
+                <button id="umlGuideBtn" class="guide-btn">📚 UML 教程</button>
+                <div id="adminBadge" class="admin-badge" style="display: none;">管理员模式</div>
+            </div>
         </header>
 
         <main class="main-content">
@@ -62,6 +65,30 @@
             <section id="waterfallGrid" class="waterfall-grid">
             </section>
         </main>
+    </div>
+
+    <div id="lightbox" class="lightbox" style="display: none;">
+        <span class="lightbox-close" id="lightboxClose">&times;</span>
+        <img id="lightboxImg" src="" alt="大图预览" />
+    </div>
+
+    <div id="umlModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h2 class="modal-title">🛠️ UML 模型加载器指南</h2>
+            <p class="modal-desc">您刚刚获取的涂装需要依赖 <strong>UML (通用模型加载器)</strong> 才能在游戏中正常显示。如果您是第一次使用，请先下载并查看安装教程。</p>
+
+            <div class="modal-links">
+                <button id="downloadUmlBtn" class="modal-btn btn-lanzou">📥 下载 UML 插件</button>
+                <a href="https://b23.tv/你的B站视频号" target="_blank" class="modal-btn btn-bilibili">📺 查看安装教程</a>
+            </div>
+
+            <div class="modal-footer">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="noMoreUmlPrompt"> 不再自动提示
+                </label>
+                <button id="closeUmlModal" class="modal-btn btn-close">我知道了</button>
+            </div>
+        </div>
     </div>
 
     <script src="skin.js"></script>

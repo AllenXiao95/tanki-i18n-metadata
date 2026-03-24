@@ -37,6 +37,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const tierFilter = document.getElementById('tierFilter');
     if (searchInput) searchInput.addEventListener('input', applyFilters);
     if (tierFilter) tierFilter.addEventListener('change', applyFilters);
+
+    // 绑定 UML 插件的下载按钮
+    const downloadUmlBtn = document.getElementById('downloadUmlBtn');
+    if (downloadUmlBtn) {
+        downloadUmlBtn.addEventListener('click', () => {
+            // 请在这里填入你真实的 UML 蓝奏云链接和密码
+            const umlUrl = "https://wwaxk.lanzoue.com/b019vreyfi";
+            const umlPwd = "ch58";
+            executeDownload(umlUrl, umlPwd);
+        });
+    }
+
+    // 绑定 UML 教程按钮与弹窗
+    const umlGuideBtn = document.getElementById('umlGuideBtn');
+    const closeUmlBtn = document.getElementById('closeUmlModal');
+    if (umlGuideBtn) umlGuideBtn.addEventListener('click', openUmlModal);
+    if (closeUmlBtn) closeUmlBtn.addEventListener('click', closeUmlModal);
+
+    // 绑定大图预览关闭事件 (点击 X 或点击黑色背景)
+    const lightbox = document.getElementById('lightbox');
+    const lightboxClose = document.getElementById('lightboxClose');
+    if (lightbox) {
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox || e.target === lightboxClose) {
+                lightbox.style.display = 'none';
+            }
+        });
+    }
 });
 
 // ==========================================
@@ -164,9 +192,16 @@ function renderWaterfall(skins) {
                 ${adminHtml}
             </div>
         `;
-        // 绑定下载事件
+
+        // 1. 绑定图片点击放大事件
+        const imgElement = card.querySelector('.cover-img');
+        imgElement.addEventListener('click', () => openLightbox(coverImg));
+
+        // 2. 绑定下载事件 (注意这里！把传入 downloads 改为传入整条 skin 数据，以便我们在下载时判断是否需要 UML)
         const btn = card.querySelector('.download-btn');
-        btn.addEventListener('click', () => handleDownload(downloads));
+        btn.addEventListener('click', () => handleDownload(skin));
+
+        grid.appendChild(card);
 
         grid.appendChild(card);
     });
@@ -176,28 +211,50 @@ function renderWaterfall(skins) {
 // 5. 核心业务逻辑：下载、上传、删改
 // ==========================================
 
-// --- 下载与复制逻辑 (终极兼容版) ---
-async function handleDownload(downloads) {
-    if (!downloads || downloads.length === 0) return;
-    const { url, pwd } = downloads[0];
+// --- 下载与复制逻辑 ---
+async function executeDownload(url, pwd) {
+  if (!url) return;
 
-    if (pwd) {
-        try {
-            if (navigator.clipboard && window.isSecureContext) {
-                await navigator.clipboard.writeText(pwd);
-                showToast(`🎉 提取码 <b style="color: #eccc68;">${pwd}</b> 已复制<br><span style="font-size: 0.85em; opacity: 0.8;">即将前往下载...</span>`, 2000);
-            } else {
-                showToast(`📌 提取码为 <b style="color: #eccc68;">${pwd}</b><br><span style="font-size: 0.85em; opacity: 0.8;">(本地环境需手动复制) 即将前往...</span>`, 2500);
-            }
-        } catch (err) {
-            console.error('复制拦截:', err);
-            showToast(`📌 提取码为 <b style="color: #eccc68;">${pwd}</b><br><span style="font-size: 0.85em; opacity: 0.8;">即将前往下载...</span>`, 2500);
-        }
-        setTimeout(() => window.open(url, '_blank'), 1500);
-    } else {
-        showToast(`🚀 即将前往下载页面...`, 1000);
-        setTimeout(() => window.open(url, '_blank'), 800);
+  if (pwd) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(pwd);
+        document.getElementById('umlModal').style.display = 'none';
+
+        showToast(`🎉 提取码 <b style="color: #eccc68;">${pwd}</b> 已复制<br><span style="font-size: 0.85em; opacity: 0.8;">即将前往下载...</span>`, 2000);
+      } else {
+        showToast(`📌 提取码为 <b style="color: #eccc68;">${pwd}</b><br><span style="font-size: 0.85em; opacity: 0.8;">(本地环境需手动复制) 即将前往...</span>`, 2500);
+      }
+    } catch (err) {
+      console.error('复制拦截:', err);
+      showToast(`📌 提取码为 <b style="color: #eccc68;">${pwd}</b><br><span style="font-size: 0.85em; opacity: 0.8;">即将前往下载...</span>`, 2500);
     }
+    setTimeout(() => window.open(url, '_blank'), 1500);
+  } else {
+    showToast(`🚀 即将前往下载页面...`, 1000);
+    setTimeout(() => window.open(url, '_blank'), 800);
+  }
+}
+
+// --- 卡片点击下载逻辑 (包裹了 UML 拦截) ---
+async function handleDownload(skin) {
+  // 1. 检查 UML 依赖并触发弹窗 (如果需要的话)
+  if (skin.is_uml_required) {
+    const hideGuide = localStorage.getItem('hideUmlGuide') === 'true';
+    if (!hideGuide) {
+      return openUmlModal(); // 弹出教程
+    }
+  }
+
+  // 2. 解析当前涂装的下载链接
+  let downloads = [];
+  try { downloads = JSON.parse(skin.downloads); } catch (e) {}
+  if (downloads.length === 0) return;
+  
+  const { url, pwd } = downloads[0];
+
+  // 3. 调用核心下载逻辑
+  await executeDownload(url, pwd);
 }
 
 // --- 上传逻辑 ---
@@ -457,4 +514,29 @@ async function handleUpload(e) {
         submitBtn.disabled = false;
         submitBtn.textContent = currentEditId ? '保存修改' : '发布涂装';
     }
+}
+
+// --- UML 弹窗控制逻辑 ---
+function openUmlModal() {
+    // 每次打开时，同步 checkbox 的状态
+    const isHidden = localStorage.getItem('hideUmlGuide') === 'true';
+    document.getElementById('noMoreUmlPrompt').checked = isHidden;
+    document.getElementById('umlModal').style.display = 'flex';
+}
+
+function closeUmlModal() {
+    // 关闭时，保存 checkbox 的状态到本地存储
+    const isChecked = document.getElementById('noMoreUmlPrompt').checked;
+    if (isChecked) {
+        localStorage.setItem('hideUmlGuide', 'true');
+    } else {
+        localStorage.removeItem('hideUmlGuide');
+    }
+    document.getElementById('umlModal').style.display = 'none';
+}
+
+// --- 大图预览控制逻辑 ---
+function openLightbox(imageUrl) {
+    document.getElementById('lightboxImg').src = imageUrl;
+    document.getElementById('lightbox').style.display = 'flex';
 }
