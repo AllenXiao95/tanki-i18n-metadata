@@ -33,6 +33,13 @@
                         <input type="url" id="lanzouUrl" placeholder="蓝奏云链接" required />
                         <input type="text" id="lanzouPwd" placeholder="提取密码 (选填)" />
                     </div>
+                    <div class="form-row">
+                        <input type="text" id="skinAuthor" placeholder="涂装作者 (默认: 佚名)" />
+                        <select id="isUml" class="tier-select" style="min-width: 130px;">
+                            <option value="0">无需 UML</option>
+                            <option value="1">必需 UML</option>
+                        </select>
+                    </div>
                     <div class="form-actions">
                         <button type="submit" id="submitBtn" class="submit-btn">发布涂装</button>
                         <button type="button" id="cancelEditBtn" class="cancel-btn" style="display: none;">取消修改</button>

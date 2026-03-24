@@ -128,6 +128,11 @@ function renderWaterfall(skins) {
 
         const card = document.createElement('div');
         const fallbackImg = '/fallback.jpg';
+        // 判断是否需要显示 UML 标签
+        const umlTagHtml = skin.is_uml_required ? `<div class="uml-tag">UML 必需</div>` : '';
+        // 判断是否显示作者 (如果有值且不为空)
+        const authorHtml = skin.author ? `<div class="author-text">🎨 作者：${skin.author}</div>` : '';
+
         card.className = 'skin-card';
 
         // 如果是管理员模式，注入编辑和删除按钮
@@ -144,7 +149,7 @@ function renderWaterfall(skins) {
 
         card.innerHTML = `
             <div class="img-wrapper">
-                <img 
+                ${umlTagHtml} <img 
                 src="${coverImg}" 
                 loading="lazy" 
                 class="cover-img" 
@@ -155,7 +160,7 @@ function renderWaterfall(skins) {
             </div>
             <div class="card-info">
                 <h3>${skin.tank_model} <span class="tier-tag">${getRomanTier(skin.tier)}</span></h3>
-                <button class="download-btn">获取涂装</button>
+                ${authorHtml} <button class="download-btn">获取涂装</button>
                 ${adminHtml}
             </div>
         `;
@@ -347,6 +352,8 @@ function editSkin(encodedSkin) {
     document.getElementById('tankTier').value = skin.tier;
     document.getElementById('lanzouUrl').value = url;
     document.getElementById('lanzouPwd').value = pwd;
+    document.getElementById('skinAuthor').value = skin.author || '';
+    document.getElementById('isUml').value = skin.is_uml_required ? "1" : "0";
 
     // 编辑模式下，图片改为非必填项
     document.getElementById('skinFile').required = false;
@@ -369,6 +376,7 @@ function cancelEdit() {
     document.getElementById('skinFile').required = true; // 恢复图片必填
     document.getElementById('submitBtn').textContent = '发布涂装';
     document.getElementById('cancelEditBtn').style.display = 'none';
+    document.getElementById('isUml').value = "0";
 }
 
 // --- 核心：处理表单提交 (智能区分 新建 / 更新) ---
@@ -414,7 +422,9 @@ async function handleUpload(e) {
             downloads: [{
                 url: document.getElementById('lanzouUrl').value,
                 pwd: document.getElementById('lanzouPwd').value
-            }]
+            }],
+            author: document.getElementById('skinAuthor').value || '佚名',
+            is_uml_required: parseInt(document.getElementById('isUml').value) || 0
         };
 
         let dbRes;

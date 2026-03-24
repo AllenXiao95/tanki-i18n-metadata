@@ -51,10 +51,12 @@ body,html{background:#f4f6f8;margin:0;padding:0}
 .form-actions button{flex:1}
 .cancel-btn{background:#f1f2f6;border:none;border-radius:8px;color:#2f3542;cursor:pointer;font-size:1rem;font-weight:700;padding:12px 24px;transition:background .2s}
 .cancel-btn:hover{background:#dfe4ea}
-.img-wrapper{animation:skeleton-pulse 1.5s ease-in-out infinite;background-color:#f1f2f6;min-height:220px;overflow:hidden;width:100%}
+.img-wrapper{position:relative;animation:skeleton-pulse 1.5s ease-in-out infinite;background-color:#f1f2f6;min-height:220px;overflow:hidden;width:100%}
 @keyframes skeleton-pulse{0%{background-color:#f1f2f6}
 50%{background-color:#dfe4ea}
 to{background-color:#f1f2f6}
 }
 .cover-img{display:block;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease-in-out;width:100%}
 .cover-img.loaded{opacity:1}
+.uml-tag{position:absolute;top:10px;right:10px;background:rgba(255,71,87,.95);color:#fff;padding:4px 10px;border-radius:6px;font-size:.8rem;font-weight:700;z-index:10;backdrop-filter:blur(4px);box-shadow:0 2px 8px rgba(0,0,0,.2);pointer-events:none}
+.author-text{font-size:.85rem;color:#7f8c8d;margin-bottom:12px;display:flex;align-items:center}
