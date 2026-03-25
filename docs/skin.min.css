@@ -84,3 +84,6 @@ to{background-color:#f1f2f6}
 to{transform:scale(1);opacity:1}
 }
 .cover-img{cursor:zoom-in}
+.card-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+.author-text{font-size:.85rem;color:#7f8c8d;margin:0}
+.download-count{font-size:.8rem;color:#ff4757;font-weight:700;background:rgba(255,71,87,.1);padding:4px 10px;border-radius:12px}

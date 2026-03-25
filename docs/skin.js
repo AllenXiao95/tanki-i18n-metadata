@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 请在这里填入你真实的 UML 蓝奏云链接和密码
             const umlUrl = "https://wwaxk.lanzoue.com/b019vreyfi";
             const umlPwd = "ch58";
-            executeDownload(umlUrl, umlPwd);
+            executeDownload(umlUrl, umlPwd, null);
         });
     }
 
@@ -159,7 +159,12 @@ function renderWaterfall(skins) {
         // 判断是否需要显示 UML 标签
         const umlTagHtml = skin.is_uml_required ? `<div class="uml-tag">UML 必需</div>` : '';
         // 判断是否显示作者 (如果有值且不为空)
-        const authorHtml = skin.author ? `<div class="author-text">🎨 作者：${skin.author}</div>` : '';
+        const metaHtml = `
+            <div class="card-meta">
+                ${skin.author ? `<span class="author-text">🎨 ${skin.author}</span>` : '<span></span>'}
+                ${skin.download_count > 0 ? `<span class="download-count">🔥 ${skin.download_count}</span>` : ''}
+            </div>
+        `;
 
         card.className = 'skin-card';
 
@@ -188,7 +193,7 @@ function renderWaterfall(skins) {
             </div>
             <div class="card-info">
                 <h3>${skin.tank_model} <span class="tier-tag">${getRomanTier(skin.tier)}</span></h3>
-                ${authorHtml} <button class="download-btn">获取涂装</button>
+                ${metaHtml} <button class="download-btn">获取涂装</button>
                 ${adminHtml}
             </div>
         `;
@@ -212,49 +217,62 @@ function renderWaterfall(skins) {
 // ==========================================
 
 // --- 下载与复制逻辑 ---
-async function executeDownload(url, pwd) {
-  if (!url) return;
+async function executeDownload(url, pwd, skinId) {
+    if (!url) return;
 
-  if (pwd) {
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(pwd);
-        document.getElementById('umlModal').style.display = 'none';
-
-        showToast(`🎉 提取码 <b style="color: #eccc68;">${pwd}</b> 已复制<br><span style="font-size: 0.85em; opacity: 0.8;">即将前往下载...</span>`, 2000);
-      } else {
-        showToast(`📌 提取码为 <b style="color: #eccc68;">${pwd}</b><br><span style="font-size: 0.85em; opacity: 0.8;">(本地环境需手动复制) 即将前往...</span>`, 2500);
-      }
-    } catch (err) {
-      console.error('复制拦截:', err);
-      showToast(`📌 提取码为 <b style="color: #eccc68;">${pwd}</b><br><span style="font-size: 0.85em; opacity: 0.8;">即将前往下载...</span>`, 2500);
+    if (skinId) {
+        const downloadedKey = `downloaded_${skinId}`;
+        if (!localStorage.getItem(downloadedKey)) {
+            fetch(`${API_BASE}/api/download`, {
+                method: 'POST',
+                body: JSON.stringify({ id: skinId }),
+                headers: { 'Content-Type': 'application/json' }
+            }).then(res => {
+                if (res.ok) localStorage.setItem(downloadedKey, 'true');
+            }).catch(err => console.error("计数失败", err));
+        }
     }
-    setTimeout(() => window.open(url, '_blank'), 1500);
-  } else {
-    showToast(`🚀 即将前往下载页面...`, 1000);
-    setTimeout(() => window.open(url, '_blank'), 800);
-  }
+
+    if (pwd) {
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(pwd);
+                document.getElementById('umlModal').style.display = 'none';
+
+                showToast(`🎉 提取码 <b style="color: #eccc68;">${pwd}</b> 已复制<br><span style="font-size: 0.85em; opacity: 0.8;">即将前往下载...</span>`, 2000);
+            } else {
+                showToast(`📌 提取码为 <b style="color: #eccc68;">${pwd}</b><br><span style="font-size: 0.85em; opacity: 0.8;">(本地环境需手动复制) 即将前往...</span>`, 2500);
+            }
+        } catch (err) {
+            console.error('复制拦截:', err);
+            showToast(`📌 提取码为 <b style="color: #eccc68;">${pwd}</b><br><span style="font-size: 0.85em; opacity: 0.8;">即将前往下载...</span>`, 2500);
+        }
+        setTimeout(() => window.open(url, '_blank'), 1500);
+    } else {
+        showToast(`🚀 即将前往下载页面...`, 1000);
+        setTimeout(() => window.open(url, '_blank'), 800);
+    }
 }
 
 // --- 卡片点击下载逻辑 (包裹了 UML 拦截) ---
 async function handleDownload(skin) {
-  // 1. 检查 UML 依赖并触发弹窗 (如果需要的话)
-  if (skin.is_uml_required) {
-    const hideGuide = localStorage.getItem('hideUmlGuide') === 'true';
-    if (!hideGuide) {
-      return openUmlModal(); // 弹出教程
+    // 1. 检查 UML 依赖并触发弹窗 (如果需要的话)
+    if (skin.is_uml_required) {
+        const hideGuide = localStorage.getItem('hideUmlGuide') === 'true';
+        if (!hideGuide) {
+            return openUmlModal(); // 弹出教程
+        }
     }
-  }
 
-  // 2. 解析当前涂装的下载链接
-  let downloads = [];
-  try { downloads = JSON.parse(skin.downloads); } catch (e) {}
-  if (downloads.length === 0) return;
-  
-  const { url, pwd } = downloads[0];
+    // 2. 解析当前涂装的下载链接
+    let downloads = [];
+    try { downloads = JSON.parse(skin.downloads); } catch (e) { }
+    if (downloads.length === 0) return;
 
-  // 3. 调用核心下载逻辑
-  await executeDownload(url, pwd);
+    const { url, pwd } = downloads[0];
+
+    // 3. 调用核心下载逻辑
+    await executeDownload(url, pwd, skin.id);
 }
 
 // --- 上传逻辑 ---
