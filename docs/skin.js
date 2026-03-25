@@ -8,6 +8,16 @@ let allSkins = []; // 存储所有数据，用于本地秒级筛选
 let currentEditId = null;       // 记录当前正在编辑的涂装 ID
 let currentEditImageUrl = '';   // 记录当前编辑涂装的原始图片链接
 
+let currentRenderedSkins = []; // 记录当前展示的数据
+
+// 监听窗口尺寸改变，自动重新调整列数排版
+window.addEventListener('resize', () => {
+    clearTimeout(window.resizeTimer);
+    window.resizeTimer = setTimeout(() => {
+        if (currentRenderedSkins.length > 0) renderWaterfall(currentRenderedSkins);
+    }, 200); // 200ms 防抖
+});
+
 // ==========================================
 // 2. 初始化与事件绑定
 // ==========================================
@@ -137,38 +147,53 @@ function applyFilters() {
 }
 
 function renderWaterfall(skins) {
+    currentRenderedSkins = skins;
     const grid = document.getElementById('waterfallGrid');
     grid.innerHTML = '';
 
     if (skins.length === 0) {
-        grid.innerHTML = '<p style="text-align:center; color:#888; grid-column: 1 / -1; margin-top: 40px;">没有找到符合条件的涂装 😿</p>';
+        grid.innerHTML = '<p style="text-align:center; color:#888; width:100%; margin-top:40px;">没有找到符合条件的涂装 😿</p>';
         return;
     }
 
-    skins.forEach(skin => {
+    // === 核心算法：找出数据库中“最新的一天” ===
+    let latestDayString = '';
+    // 提取所有有效的时间戳
+    const validTimes = skins
+        .map(s => s.updated_at || s.created_at)
+        .filter(t => t) // 过滤掉空值
+        .map(t => new Date(t).getTime());
+
+    if (validTimes.length > 0) {
+        const maxTime = Math.max(...validTimes); // 找到最近的那个时间戳
+        latestDayString = new Date(maxTime).toDateString(); // 转换为本地日期字符串 (如: "Wed Mar 25 2026")，抹除具体时分秒
+    }
+    // =========================================
+
+    let colCount = 2;
+    if (window.innerWidth >= 768) colCount = 3;
+    if (window.innerWidth >= 1024) colCount = 4;
+
+    const columns = [];
+    for (let i = 0; i < colCount; i++) {
+        const col = document.createElement('div');
+        col.className = 'masonry-column';
+        grid.appendChild(col);
+        columns.push(col);
+    }
+
+    skins.forEach((skin, index) => {
         let coverImg = 'placeholder.jpg';
         let downloads = [];
         try {
             const images = JSON.parse(skin.preview_images);
             if (images.length > 0) coverImg = images[0];
             downloads = JSON.parse(skin.downloads);
-        } catch (e) { console.error('解析错误', e); }
+        } catch (e) { }
 
         const card = document.createElement('div');
-        const fallbackImg = '/fallback.jpg';
-        // 判断是否需要显示 UML 标签
-        const umlTagHtml = skin.is_uml_required ? `<div class="uml-tag">UML 必需</div>` : '';
-        // 判断是否显示作者 (如果有值且不为空)
-        const metaHtml = `
-            <div class="card-meta">
-                ${skin.author ? `<span class="author-text">🎨 ${skin.author}</span>` : '<span></span>'}
-                ${skin.download_count > 0 ? `<span class="download-count">🔥 ${skin.download_count}</span>` : ''}
-            </div>
-        `;
-
         card.className = 'skin-card';
 
-        // 如果是管理员模式，注入编辑和删除按钮
         let adminHtml = '';
         if (isUploadMode) {
             const safeSkinData = encodeURIComponent(JSON.stringify(skin));
@@ -180,35 +205,49 @@ function renderWaterfall(skins) {
       `;
         }
 
-        card.innerHTML = `
-            <div class="img-wrapper">
-                ${umlTagHtml} <img 
-                src="${coverImg}" 
-                loading="lazy" 
-                class="cover-img" 
-                alt="${skin.tank_model}" 
-                onload="this.classList.add('loaded')" 
-                onerror="this.src='/fallback.jpg'; this.classList.add('loaded');"
-                />
-            </div>
-            <div class="card-info">
-                <h3>${skin.tank_model} <span class="tier-tag">${getRomanTier(skin.tier)}</span></h3>
-                ${metaHtml} <button class="download-btn">获取涂装</button>
-                ${adminHtml}
-            </div>
-        `;
+        // === 判断当前涂装是否属于“最新的一天” ===
+        let isNew = false;
+        const skinTimeRaw = skin.updated_at || skin.created_at;
+        if (skinTimeRaw && latestDayString) {
+            // 只要日期部分和最新的一天吻合，哪怕一天传了 10 个，这 10 个都是 NEW
+            if (new Date(skinTimeRaw).toDateString() === latestDayString) {
+                isNew = true;
+            }
+        }
+        const newTagHtml = isNew ? `<div class="new-tag">NEW</div>` : '';
+        // =========================================
 
-        // 1. 绑定图片点击放大事件
+        const umlTagHtml = skin.is_uml_required ? `<div class="uml-tag">UML 必需</div>` : '';
+        const metaHtml = `
+      <div class="card-meta">
+        ${skin.author ? `<span class="author-text">🎨 ${skin.author}</span>` : '<span></span>'}
+        <span class="download-count">🔥 ${skin.download_count || 0}</span>
+      </div>
+    `;
+
+        // 记得在 img-wrapper 里保留 ${newTagHtml} 
+        card.innerHTML = `
+      <div class="img-wrapper">
+        ${newTagHtml}
+        ${umlTagHtml}
+        <img src="${coverImg}" loading="lazy" class="cover-img" alt="${skin.tank_model}" onload="this.classList.add('loaded')" onerror="this.src='/fallback.jpg'; this.classList.add('loaded');" />
+      </div>
+      <div class="card-info">
+        <h3>${skin.tank_model} <span class="tier-tag">${getRomanTier(skin.tier)}</span></h3>
+        ${metaHtml}
+        <button class="download-btn">获取涂装</button>
+        ${adminHtml}
+      </div>
+    `;
+
         const imgElement = card.querySelector('.cover-img');
         imgElement.addEventListener('click', () => openLightbox(coverImg));
 
-        // 2. 绑定下载事件 (注意这里！把传入 downloads 改为传入整条 skin 数据，以便我们在下载时判断是否需要 UML)
         const btn = card.querySelector('.download-btn');
         btn.addEventListener('click', () => handleDownload(skin));
 
-        grid.appendChild(card);
-
-        grid.appendChild(card);
+        const targetColIndex = index % colCount;
+        columns[targetColIndex].appendChild(card);
     });
 }
 
