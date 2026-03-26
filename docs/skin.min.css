@@ -82,9 +82,9 @@ to{background-color:#f1f2f6}
 to{transform:scale(1);opacity:1}
 }
 .cover-img{cursor:zoom-in}
-.card-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
-.author-text{font-size:.85rem;color:#7f8c8d;margin:0}
-.download-count{font-size:.8rem;color:#ff4757;font-weight:700;background:rgba(255,71,87,.1);padding:4px 10px;border-radius:12px}
+.card-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;gap:10px}
+.author-text{font-size:.85rem;color:#7f8c8d;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.download-count{font-size:.8rem;color:#ff4757;font-weight:700;background:rgba(255,71,87,.1);padding:4px 10px;border-radius:12px;flex-shrink:0}
 .new-tag{position:absolute;top:10px;left:10px;z-index:10;pointer-events:none;color:#fff;padding:4px 12px;border-radius:6px;font-size:.8rem;font-weight:700;letter-spacing:1px;background-image:linear-gradient(135deg,#ff357a,#fff172,#2ed573,#1e90ff,#8e44ad,#ff357a);background-size:200% auto;animation:gradientShift 4s linear infinite,neon-pulse 2s ease-in-out infinite}
 @keyframes gradientShift{0%{background-position:0 50%}
 100%{background-position:200% 50%}
