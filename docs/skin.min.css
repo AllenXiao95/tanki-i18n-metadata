@@ -32,6 +32,17 @@ body,html{background:#f4f6f8;margin:0;padding:0}
 .form-actions{flex-direction:column-reverse;gap:10px}
 .form-row input,.form-row select,.search-input,.tier-select{width:100%!important;min-width:unset!important;font-size:16px;padding:14px 18px}
 .tier-select{padding-right:45px;background-position:right 18px center}
+.skin-card{display:flex!important;flex-direction:row!important;align-items:stretch!important;min-height:130px;width:100%}
+.img-wrapper{width:45%!important;flex-shrink:0!important;min-height:100%!important;position:relative}
+.cover-img,.img-wrapper{border-radius:12px 0 0 12px!important}
+.cover-img{position:absolute!important;top:0;left:0;width:100%!important;height:100%!important;object-fit:cover!important}
+.card-info{width:55%!important;flex-shrink:1!important;min-width:0!important;padding:12px;display:flex;flex-direction:column;justify-content:space-between}
+.card-info h3{font-size:1rem;margin-top:0;margin-bottom:6px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-meta{margin-bottom:8px}
+.download-btn{margin-top:auto;padding:8px 10px;font-size:.9rem}
+.new-tag,.uml-tag{top:6px;padding:2px 6px;font-size:.7rem}
+.new-tag{left:6px}
+.uml-tag{right:6px}
 }
 #toast-container{display:flex;flex-direction:column;gap:10px;left:50%;pointer-events:none;position:fixed;top:20px;transform:translateX(-50%);z-index:9999}
 .toast-msg{animation:toastIn .3s cubic-bezier(.175,.885,.32,1.275) forwards;background:rgba(45,52,54,.95);border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);color:#fff;font-size:.95rem;line-height:1.5;opacity:0;padding:12px 24px;text-align:center;transform:translateY(-20px)}
