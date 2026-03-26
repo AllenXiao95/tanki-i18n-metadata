@@ -221,7 +221,7 @@ function renderWaterfall(skins) {
         const metaHtml = `
       <div class="card-meta">
         ${skin.author ? `<span class="author-text">🎨 ${skin.author}</span>` : '<span></span>'}
-        <span class="download-count">🔥 ${skin.download_count || 0}</span>
+        ${skin.download_count > 0 ? `<span class="download-count">🔥 ${skin.download_count}</span>` : ''}
       </div>
     `;
 
