@@ -342,34 +342,59 @@ function renderWaterfall(skins) {
 // 6. 核心业务：下载、上传、删改
 // ==========================================
 
-// --- 纯净的下载与拦截逻辑 ---
-// --- 核心：直链解析与下载逻辑 ---
+// ==========================================
+// ⏳ 全局 Loading 控制函数
+// ==========================================
+function showGlobalLoading(text = "正在解析直链...") {
+    let overlay = document.getElementById('globalLoading');
+    // 如果页面上还没有这个 DOM，就动态创建一个
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'globalLoading';
+        overlay.className = 'global-loading-overlay';
+        overlay.innerHTML = `
+            <div class="loading-spinner"></div>
+            <div class="loading-text" id="globalLoadingText"></div>
+        `;
+        document.body.appendChild(overlay);
+    }
+    // 更新文字并显示
+    document.getElementById('globalLoadingText').innerHTML = text;
+    overlay.classList.add('active');
+}
+
+function hideGlobalLoading() {
+    const overlay = document.getElementById('globalLoading');
+    if (overlay) {
+        overlay.classList.remove('active');
+    }
+}
+
+// ==========================================
+// 重构：直链解析与下载逻辑 (带防刷 Loading)
+// ==========================================
 async function executeDownload(url, pwd, skinId) {
     if (!url) return;
 
-    // 1. 触发后端计次 (防刷限制保持不变)
+    // 1. 触发后端计次 
     if (skinId) {
         const downloadedKey = `downloaded_${skinId}`;
         if (!localStorage.getItem(downloadedKey)) {
             fetch(`${API_BASE}/api/download`, {
-                method: 'POST',
-                body: JSON.stringify({ id: skinId }),
-                headers: { 'Content-Type': 'application/json' }
+                method: 'POST', body: JSON.stringify({ id: skinId }), headers: { 'Content-Type': 'application/json' }
             }).then(res => {
                 if (res.ok) localStorage.setItem(downloadedKey, 'true');
-            }).catch(err => console.error("计数失败", err));
+            }).catch(e => { });
         }
     }
 
-    // 如果当前有 UML 弹窗，先关掉它
     const umlModal = document.getElementById('umlModal');
     if (umlModal) umlModal.style.display = 'none';
 
-    // 2. 交互反馈：提示用户正在解析
-    showToast(`⏳ 正在解析下载直链，请稍候...`, 3000);
+    // 🛑 核心：在开始发送请求前，立刻弹出全局锁屏 Loading！
+    showGlobalLoading("⏳ 正在请求极速直链<br><span style='font-size:0.8rem; font-weight:normal; opacity:0.8; display:block; margin-top:8px;'>正在请求服务器...</span>");
 
     try {
-        // 2. 将参数加密并发送 POST 请求
         const securePayload = await generateSecurePayload(url, pwd);
 
         const res = await fetch(PARSE_WORKER_URL, {
@@ -378,24 +403,33 @@ async function executeDownload(url, pwd, skinId) {
             body: JSON.stringify({ payload: securePayload })
         });
 
-        // 如果 HTTP 状态码不是 200，直接抛出异常触发降级
-        if (!res.ok) throw new Error("解析接口网络错误");
-        const data = await res.json();
-        if (data.code === 200 && data.downUrl) {
-            showToast(`🚀 解析成功！即将开始下载`, 2000);
-            // 延迟一点点，让浏览器打开新窗口下载文件
-            setTimeout(() => {
-                window.open(data.downUrl, '_blank');
-            }, 800);
+        if (!res.ok) throw new Error("解析接口返回非 200 状态");
 
+        const data = await res.json();
+
+        // 3. 校验并跳转
+        if (data.code === 200 && data.downUrl) {
+
+            // 解析成功，把 Loading 的文字换成成功提示
+            document.getElementById('globalLoadingText').innerHTML = "🚀 解析成功！即将调起下载...";
+
+            // 延迟一小会儿再跳，让用户看清“解析成功”的字样，随后关闭 Loading 并跳转
+            setTimeout(() => {
+                hideGlobalLoading();
+                window.location.href = data.downUrl;
+            }, 800);
             return;
 
         } else {
-            throw new Error(JSON.stringify(data));
+            throw new Error(data.msg || "解析结果异常");
         }
 
     } catch (error) {
-        console.warn('直链解析失败，启动降级模式:', error);
+        console.warn('直链解析受阻，启动备用下载模式:', error);
+
+        // 🛑 如果发生任何报错导致走不通，务必关掉 Loading，否则页面会一直卡死！
+        hideGlobalLoading();
+
         fallbackDownload(url, pwd);
     }
 }

@@ -104,3 +104,9 @@ to{transform:scale(1);opacity:1}
 50%{box-shadow:0 0 0 8px rgba(255,255,255,0);transform:scale(1.05)}
 100%{box-shadow:0 0 0 0 rgba(255,255,255,0);transform:scale(1)}
 }
+.global-loading-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:99999;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease}
+.global-loading-overlay.active{opacity:1;visibility:visible}
+.loading-spinner{width:50px;height:50px;border:4px solid rgba(255,255,255,.2);border-top-color:#2ed573;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px}
+.loading-text{font-size:1.1rem;font-weight:700;letter-spacing:1px}
+@keyframes spin{to{transform:rotate(360deg)}
+}
