@@ -110,3 +110,4 @@ to{transform:scale(1);opacity:1}
 .loading-text{font-size:1.1rem;font-weight:700;letter-spacing:1px}
 @keyframes spin{to{transform:rotate(360deg)}
 }
+.download-btn.installed-btn{background:#95a5a6!important;color:#ecf0f1!important;cursor:not-allowed!important;box-shadow:none!important;transform:none!important;opacity:.8}
