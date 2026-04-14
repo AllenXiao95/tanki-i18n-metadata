@@ -408,6 +408,21 @@
   .gap-8 {
     gap: calc(var(--spacing) * 8);
   }
+  .h-5 {
+    height: calc(var(--spacing) * 5);
+  }
+  .w-5 {
+    width: calc(var(--spacing) * 5);
+  }
+  .animate-spin {
+    animation: var(--animate-spin);
+  }
+  .opacity-25 {
+    opacity: 25%;
+  }
+  .opacity-75 {
+    opacity: 75%;
+  }
   .space-y-1 {
     :where(& > :not(:last-child)) {
       --tw-space-y-reverse: 0;
@@ -1566,4 +1581,10 @@
 @keyframes pulseNew {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.8; transform: scale(1.08); }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
