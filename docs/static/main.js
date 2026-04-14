@@ -173,6 +173,7 @@ window.openShip = openShip;
 
 /* ---------- 悬浮按钮（#qq-toggle）自动收起/展开 ---------- */
 document.addEventListener("DOMContentLoaded", () => {
+  checkRegionAndOptimizeDownload();
   const toggleWrap = document.getElementById("qq-toggle");
   if (!toggleWrap) return;
 
@@ -307,53 +308,58 @@ async function executeDownload(url, pwd) {
     }
 }
 
-/* ==========================================
-   地区检测与直链动态替换逻辑
-   ========================================== */
-document.addEventListener('DOMContentLoaded', () => {
-    checkRegionAndOptimizeDownload();
-});
+// 封装的按钮绑定器：接管点击事件，增加 Loading 和 防连点 机制
+function bindDownloadButtonWithLoading(btnId, defaultText, url, pwd) {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+
+    // 剥夺默认行为
+    btn.href = "javascript:void(0);";
+    btn.removeAttribute('target');
+    btn.innerHTML = defaultText;
+
+    btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        // 1. 开启 Loading 状态 (防连点)
+        btn.innerHTML = `<span style="display:inline-block; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;">⏳ 正在请求加速通道...</span>`;
+        btn.style.pointerEvents = 'none'; // 关键：禁用鼠标事件，防止疯狂连点
+        btn.style.opacity = '0.7';
+
+        // 2. 挂起等待直链解析与下载 (注意这里必须是 await)
+        await executeDownload(url, pwd);
+
+        // 3. 恢复按钮状态
+        // (如果解析成功，浏览器其实已经直接切走去下载了；如果解析失败走了降级，页面还在，这里正好恢复按钮，方便用户二次操作)
+        btn.innerHTML = defaultText;
+        btn.style.pointerEvents = 'auto';
+        btn.style.opacity = '1';
+    });
+}
 
 async function checkRegionAndOptimizeDownload() {
     try {
         const res = await fetch('/cdn-cgi/trace');
         const traceText = await res.text();
         
-        // 提取国家代码 loc=XX
         const locMatch = traceText.match(/loc=([A-Z]{2})/);
         const userCountry = locMatch ? locMatch[1] : null;
-        debugger
 
-        // 如果识别到是大陆地区 (CN)
         if (userCountry === 'CN') {
-            console.log("检测到大陆地区用户，正在切换至蓝奏云国内加速通道...");
+            bindDownloadButtonWithLoading(
+                'btn-win10', 
+                'Windows 8 / 10 / 11 下载', 
+                'https://wwbfa.lanzoup.com/iXlyn3kw5j9e', 
+                'df61'
+            );
 
-            const btnWin10 = document.getElementById('btn-win10');
-            const btnWin7 = document.getElementById('btn-win7');
-
-            if (btnWin10) {
-                btnWin10.href = "javascript:void(0);";
-                btnWin10.removeAttribute('target');
-                btnWin10.innerHTML = 'Windows 8 / 10 / 11 (国内极速下载)';
-                
-                btnWin10.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    executeDownload('https://wwbfa.lanzoup.com/iXlyn3kw5j9e', 'df61');
-                });
-            }
-
-            if (btnWin7) {
-                btnWin7.href = "javascript:void(0);";
-                btnWin7.removeAttribute('target');
-                btnWin7.innerHTML = 'Windows 7 (国内极速下载)';
-                
-                btnWin7.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    executeDownload('https://wwbfa.lanzoup.com/iK9sw3kw5jyj', 'df61');
-                });
-            }
-        } else {
-            console.log(`检测到海外地区用户 (${userCountry})，保持默认国际加速直链。`);
+            bindDownloadButtonWithLoading(
+                'btn-win7', 
+                'Windows 7 下载', 
+                'https://wwbfa.lanzoup.com/iK9sw3kw5jyj', 
+                'df61'
+            );
+            
         }
     } catch (error) {
         console.warn("地区检测接口异常，保持默认下载源", error);
