@@ -1583,8 +1583,11 @@
   50% { opacity: 0.8; transform: scale(1.08); }
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+@keyframes custom-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-safe {
+  animation: custom-spin 1s linear infinite;
 }
