@@ -316,13 +316,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function checkRegionAndOptimizeDownload() {
     try {
-        // 利用 Cloudflare 提供的免费 Trace 接口判断地区
-        const res = await fetch('https://1.1.1.1/cdn-cgi/trace');
+        const res = await fetch('/cdn-cgi/trace');
         const traceText = await res.text();
         
         // 提取国家代码 loc=XX
         const locMatch = traceText.match(/loc=([A-Z]{2})/);
         const userCountry = locMatch ? locMatch[1] : null;
+        debugger
 
         // 如果识别到是大陆地区 (CN)
         if (userCountry === 'CN') {
