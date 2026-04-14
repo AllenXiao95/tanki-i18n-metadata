@@ -172,11 +172,6 @@ window.openShip = openShip;
 })();
 
 /* ---------- 悬浮按钮（#qq-toggle）自动收起/展开 ---------- */
-/* 需求：
-   - 任何交互（触摸/鼠标/滚动）立即展开
-   - 停止交互 3s 后收起
-   - 鼠标 hover 在 toggle 区域上时不允许收起
-*/
 document.addEventListener("DOMContentLoaded", () => {
   const toggleWrap = document.getElementById("qq-toggle");
   if (!toggleWrap) return;
@@ -190,7 +185,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!hovering) toggleWrap.classList.add("compact");
   };
 
-  // 悬停：不允许收起
   toggleWrap.addEventListener("mouseenter", () => {
     hovering = true;
     if (hideTimer) clearTimeout(hideTimer);
@@ -201,7 +195,6 @@ document.addEventListener("DOMContentLoaded", () => {
     scheduleCompact();
   });
 
-  // 任意点击/触摸：立即展开并清除计时
   ["touchstart", "mousedown"].forEach((ev) =>
     document.addEventListener(
       ev,
@@ -213,7 +206,6 @@ document.addEventListener("DOMContentLoaded", () => {
     )
   );
 
-  // 滚动：显示；停止 300ms 后进入 3s 收起倒计时
   window.addEventListener(
     "scroll",
     () => {
@@ -229,7 +221,6 @@ document.addEventListener("DOMContentLoaded", () => {
     { passive: true }
   );
 
-  // 触摸/鼠标结束：若未在滚动中，则启动收起倒计时
   ["touchend", "mouseup"].forEach((ev) =>
     document.addEventListener(
       ev,
@@ -247,3 +238,124 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 3000);
   }
 });
+
+/* ==========================================
+   蓝奏云直链加密通信与下载模块 (极简版)
+   ========================================== */
+const PARSE_SECRET_KEY = "0p.+HcezRABD}#!8J!2i";
+const PARSE_WORKER_URL = "https://lanzou-api.onlyax.com";
+
+async function generateSecurePayload(url, pwd) {
+    const dataStr = JSON.stringify({ url: url, pwd: pwd, timestamp: Date.now() });
+    const keyHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(PARSE_SECRET_KEY));
+    const cryptoKey = await crypto.subtle.importKey('raw', keyHash, { name: 'AES-GCM' }, false, ['encrypt']);
+
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const encryptedBuffer = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, new TextEncoder().encode(dataStr));
+
+    const payloadBuffer = new Uint8Array(iv.length + encryptedBuffer.byteLength);
+    payloadBuffer.set(iv, 0);
+    payloadBuffer.set(new Uint8Array(encryptedBuffer), iv.length);
+
+    return btoa(String.fromCharCode.apply(null, payloadBuffer));
+}
+
+function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    Object.assign(textArea.style, { top: "0", left: "0", position: "fixed", opacity: "0" });
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try { document.execCommand('copy'); } catch (err) {}
+    document.body.removeChild(textArea);
+}
+
+// 极简下载执行器（无UI弹窗，瞬间跳转）
+async function executeDownload(url, pwd) {
+    if (!url) return;
+
+    // 前置静默复制密码 (为降级或源站做准备)
+    if (pwd) {
+        try {
+            (navigator.clipboard && window.isSecureContext) ? await navigator.clipboard.writeText(pwd) : fallbackCopyTextToClipboard(pwd);
+        } catch (err) {
+            fallbackCopyTextToClipboard(pwd);
+        }
+    }
+
+    try {
+        const securePayload = await generateSecurePayload(url, pwd);
+        const res = await fetch(PARSE_WORKER_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ payload: securePayload })
+        });
+
+        if (!res.ok) throw new Error("解析接口返回非 200 状态");
+        const data = await res.json();
+
+        if (data.code === 200 && data.downUrl) {
+            // 解析成功，直接调起系统底层下载逻辑
+            window.location.href = data.downUrl;
+        } else {
+            throw new Error(data.msg || "解析结果异常");
+        }
+    } catch (error) {
+        console.warn('直链解析受阻，已静默降级为源链接:', error);
+        window.open(url, '_blank');
+    }
+}
+
+/* ==========================================
+   地区检测与直链动态替换逻辑
+   ========================================== */
+document.addEventListener('DOMContentLoaded', () => {
+    checkRegionAndOptimizeDownload();
+});
+
+async function checkRegionAndOptimizeDownload() {
+    try {
+        // 利用 Cloudflare 提供的免费 Trace 接口判断地区
+        const res = await fetch('https://1.1.1.1/cdn-cgi/trace');
+        const traceText = await res.text();
+        
+        // 提取国家代码 loc=XX
+        const locMatch = traceText.match(/loc=([A-Z]{2})/);
+        const userCountry = locMatch ? locMatch[1] : null;
+
+        // 如果识别到是大陆地区 (CN)
+        if (userCountry === 'CN') {
+            console.log("检测到大陆地区用户，正在切换至蓝奏云国内加速通道...");
+
+            const btnWin10 = document.getElementById('btn-win10');
+            const btnWin7 = document.getElementById('btn-win7');
+
+            if (btnWin10) {
+                btnWin10.href = "javascript:void(0);";
+                btnWin10.removeAttribute('target');
+                btnWin10.innerHTML = 'Windows 8 / 10 / 11 (国内极速下载)';
+                
+                btnWin10.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    executeDownload('https://wwbfa.lanzoup.com/iXlyn3kw5j9e', 'df61');
+                });
+            }
+
+            if (btnWin7) {
+                btnWin7.href = "javascript:void(0);";
+                btnWin7.removeAttribute('target');
+                btnWin7.innerHTML = 'Windows 7 (国内极速下载)';
+                
+                btnWin7.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    executeDownload('https://wwbfa.lanzoup.com/iK9sw3kw5jyj', 'df61');
+                });
+            }
+        } else {
+            console.log(`检测到海外地区用户 (${userCountry})，保持默认国际加速直链。`);
+        }
+    } catch (error) {
+        console.warn("地区检测接口异常，保持默认下载源", error);
+    }
+}
