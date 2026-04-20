@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('closeUmlModal')?.addEventListener('click', closeUmlModal);
 
     document.getElementById('downloadUmlBtn')?.addEventListener('click', () => {
-        executeDownload("https://wwaxk.lanzoue.com/b019vreyfi", "ch58", null);
+        executeDownload("https://wwaxk.lanzoue.com/b019vreyfi", "ch58", null, "");
     });
 
     const lightbox = document.getElementById('lightbox');
@@ -325,7 +325,7 @@ function renderWaterfall(skins) {
 // ==========================================
 // 8. 核心业务 (下载、上传、删改)
 // ==========================================
-async function executeDownload(url, pwd, skinId) {
+async function executeDownload(url, pwd, skinId, skinPreview) {
     if (!url) return;
 
     if (skinId) {
@@ -373,7 +373,7 @@ async function executeDownload(url, pwd, skinId) {
 
             if (isElectronBox) {
                 showToast(`⏳ 正在交由盒子下载安装...`, 2000);
-                window.parent.postMessage({ type: 'START_DOWNLOAD', payload: { skinId, url: data.downUrl } }, '*');
+                window.parent.postMessage({ type: 'START_DOWNLOAD', payload: { skinId, url: data.downUrl, skinUrl: skinPreview } }, '*');
                 hideGlobalLoading();
             } else {
                 document.getElementById('globalLoadingText').innerHTML = "🚀 解析成功！即将调起下载...";
@@ -414,8 +414,15 @@ async function handleDownload(skin) {
 
     try {
         const downloads = JSON.parse(skin.downloads);
+        let skinPreview = '';
+        if (skin.preview_images) {
+            const images = JSON.parse(skin.preview_images);
+            if (images.length > 0) {
+                skinPreview = images[0];
+            }
+        }
         if (downloads.length > 0) {
-            await executeDownload(downloads[0].url, downloads[0].pwd, skin.id);
+            await executeDownload(downloads[0].url, downloads[0].pwd, skin.id, skinPreview);
         }
     } catch (e) {}
 }
