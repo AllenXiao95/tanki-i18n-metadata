@@ -61,12 +61,7 @@ async function generateSecurePayload(url, pwd) {
     payloadBuffer.set(iv, 0);
     payloadBuffer.set(new Uint8Array(encryptedBuffer), iv.length);
 
-    let binary = '';
-    const len = payloadBuffer.byteLength;
-    for (let i = 0; i < len; i++) {
-        binary += String.fromCharCode(payloadBuffer[i]);
-    }
-    return btoa(binary);
+    return btoa(String.fromCharCode.apply(null, payloadBuffer));
 }
 
 // ==========================================
@@ -192,7 +187,7 @@ function fallbackCopyTextToClipboard(text) {
     const textArea = document.createElement("textarea");
     textArea.value = text;
     Object.assign(textArea.style, { top: "0", left: "0", position: "fixed", opacity: "0" });
-
+    
     document.body.appendChild(textArea);
     textArea.focus();
     textArea.select();
@@ -287,11 +282,11 @@ function renderWaterfall(skins) {
         try {
             const images = JSON.parse(skin.preview_images);
             if (images.length) coverImg = images[0];
-        } catch (e) { }
+        } catch (e) {}
 
         const isNew = skin.updated_at || skin.created_at ? new Date(skin.updated_at || skin.created_at).toDateString() === latestDayString : false;
         const safeSkinData = encodeURIComponent(JSON.stringify(skin));
-
+        
         // 判断本地安装状态并分配类名
         const isDownloaded = downloadedSkinIds.has(skin.id);
         const btnClass = isDownloaded ? 'download-btn installed-btn' : 'download-btn';
@@ -340,7 +335,7 @@ async function executeDownload(url, pwd, skinId, skinPreview) {
                 method: 'POST', body: JSON.stringify({ id: skinId }), headers: { 'Content-Type': 'application/json' }
             }).then(res => {
                 if (res.ok) localStorage.setItem(downloadedKey, 'true');
-            }).catch(() => { });
+            }).catch(() => {});
         }
     }
 
@@ -429,7 +424,7 @@ async function handleDownload(skin) {
         if (downloads.length > 0) {
             await executeDownload(downloads[0].url, downloads[0].pwd, skin.id, skinPreview);
         }
-    } catch (e) { }
+    } catch (e) {}
 }
 
 async function handleUpload(e) {
@@ -494,7 +489,7 @@ async function deleteSkin(id) {
             headers: { 'Authorization': encodeURIComponent(adminToken) }
         });
         if (!res.ok) throw new Error('删除失败，请检查 Token');
-
+        
         showToast('🗑️ 涂装已删除');
         fetchSkins();
     } catch (error) {
@@ -510,12 +505,12 @@ function editSkin(encodedSkin) {
     try {
         const downloads = JSON.parse(skin.downloads);
         if (downloads.length > 0) { url = downloads[0].url; pwd = downloads[0].pwd; }
-    } catch (e) { }
+    } catch (e) {}
 
     try {
         const images = JSON.parse(skin.preview_images);
         if (images.length > 0) currentEditImageUrl = images[0];
-    } catch (e) { }
+    } catch (e) {}
 
     document.getElementById('tankModel').value = skin.tank_model;
     document.getElementById('tankTier').value = skin.tier;
