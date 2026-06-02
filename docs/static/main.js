@@ -1,5 +1,5 @@
 /* ================================
-   main.js  — onlyax 统一脚本（整合版）
+   main.js  — onlyax 统一脚本
    ================================ */
 
 /* ---------- 事件追踪 ---------- */
@@ -41,7 +41,7 @@ function track(name, props = {}) {
       banner.style.display = "flex";
     }
     acceptBtn.addEventListener("click", function () {
-      try { localStorage.setItem("cookieAccepted", "true"); } catch (e) {}
+      try { localStorage.setItem("cookieAccepted", "true"); } catch (e) { }
       banner.style.display = "none";
       track("cookieAccepted", { action: "accept" });
     });
@@ -79,7 +79,7 @@ function track(name, props = {}) {
         try {
           await navigator.clipboard.writeText(qq);
           ok = true;
-        } catch (_) {}
+        } catch (_) { }
       }
       if (!ok) {
         // 旧浏览器降级方案
@@ -89,7 +89,7 @@ function track(name, props = {}) {
         textarea.style.opacity = "0";
         document.body.appendChild(textarea);
         textarea.select();
-        try { ok = document.execCommand("copy"); } catch (_) {}
+        try { ok = document.execCommand("copy"); } catch (_) { }
         document.body.removeChild(textarea);
       }
 
@@ -148,13 +148,13 @@ window.closeResetModal = closeResetModal;
 
 /* ---------- 妙妙盒下载（全局暴露） ---------- */
 function openBox() {
-    window.open('https://goover.cn', '_blank');
+  window.open('https://goover.cn', '_blank');
 }
 window.openBox = openBox;
 
 /* ---------- 战舰汉化（全局暴露） ---------- */
 function openShip() {
-    window.open('https://localizedkorabli.org', '_blank');
+  window.open('https://localizedkorabli.org', '_blank');
 }
 window.openShip = openShip;
 
@@ -241,135 +241,68 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* ==========================================
-   蓝奏云直链加密通信与下载模块 (极简版)
+   OSS 直链下载模块
    ========================================== */
-const PARSE_SECRET_KEY = "0p.+HcezRABD}#!8J!2i";
-const PARSE_WORKER_URL = "https://lanzou-api.onlyax.com";
-
-async function generateSecurePayload(url, pwd) {
-    const dataStr = JSON.stringify({ url: url, pwd: pwd, timestamp: Date.now() });
-    const keyHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(PARSE_SECRET_KEY));
-    const cryptoKey = await crypto.subtle.importKey('raw', keyHash, { name: 'AES-GCM' }, false, ['encrypt']);
-
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const encryptedBuffer = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, new TextEncoder().encode(dataStr));
-
-    const payloadBuffer = new Uint8Array(iv.length + encryptedBuffer.byteLength);
-    payloadBuffer.set(iv, 0);
-    payloadBuffer.set(new Uint8Array(encryptedBuffer), iv.length);
-
-    return btoa(String.fromCharCode.apply(null, payloadBuffer));
-}
-
-function fallbackCopyTextToClipboard(text) {
-    const textArea = document.createElement("textarea");
-    textArea.value = text;
-    Object.assign(textArea.style, { top: "0", left: "0", position: "fixed", opacity: "0" });
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    try { document.execCommand('copy'); } catch (err) {}
-    document.body.removeChild(textArea);
-}
-
-// 极简下载执行器（无UI弹窗，瞬间跳转）
-async function executeDownload(url, pwd) {
-    if (!url) return;
-
-    // 前置静默复制密码 (为降级或源站做准备)
-    if (pwd) {
-        try {
-            (navigator.clipboard && window.isSecureContext) ? await navigator.clipboard.writeText(pwd) : fallbackCopyTextToClipboard(pwd);
-        } catch (err) {
-            fallbackCopyTextToClipboard(pwd);
-        }
-    }
-
-    try {
-        const securePayload = await generateSecurePayload(url, pwd);
-        const res = await fetch(PARSE_WORKER_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ payload: securePayload })
-        });
-
-        if (!res.ok) throw new Error("解析接口返回非 200 状态");
-        const data = await res.json();
-
-        if (data.code === 200 && data.downUrl) {
-            // 解析成功，直接调起系统底层下载逻辑
-            window.location.href = data.downUrl;
-        } else {
-            throw new Error(data.msg || "解析结果异常");
-        }
-    } catch (error) {
-        console.warn('直链解析受阻，已静默降级为源链接:', error);
-        window.open(url, '_blank');
-    }
-}
 
 // 封装的按钮绑定器：接管点击事件，增加 Loading 和 防连点 机制
-function bindDownloadButtonWithLoading(btnId, defaultText, url, pwd) {
-    const btn = document.getElementById(btnId);
-    if (!btn) return;
+function bindDownloadButtonWithLoading(btnId, defaultText, url) {
+  var btn = document.getElementById(btnId);
+  if (!btn) return;
 
-    // 剥夺默认行为
-    btn.href = "javascript:void(0);";
-    btn.removeAttribute('target');
-    btn.innerHTML = defaultText;
+  // 剥夺默认行为
+  btn.href = "javascript:void(0);";
+  btn.removeAttribute('target');
+  btn.innerHTML = defaultText;
 
-    btn.addEventListener('click', async (e) => {
-        e.preventDefault();
+  btn.addEventListener('click', function (e) {
+    e.preventDefault();
 
-        // 1. 开启 Loading 状态 (防连点)
-        btn.innerHTML = `
-            <span class="flex items-center justify-center gap-2">
-                <svg class="animate-spin-safe h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                正在请求加速通道...
-            </span>
-        `;
-        btn.style.pointerEvents = 'none'; // 关键：禁用鼠标事件，防止疯狂连点
-        btn.style.opacity = '0.8';
+    // 1. 开启 Loading 状态 (防连点)
+    btn.innerHTML = ['\u003cspan class="flex items-center justify-center gap-2"\u003e',
+      '\u003csvg class="animate-spin-safe h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"\u003e',
+      '\u003ccircle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"\u003e\u003c/circle\u003e',
+      '\u003cpath class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"\u003e\u003c/path\u003e',
+      '\u003c/svg\u003e', '\u6b63\u5728\u8bf7\u6c42\u52a0\u901f\u901a\u9053...', '\u003c/span\u003e'].join('');
+    btn.style.pointerEvents = 'none';
+    btn.style.opacity = '0.8';
 
-        // 2. 挂起等待直链解析与下载 (注意这里必须是 await)
-        await executeDownload(url, pwd);
+    // 2. 直接跳转 OSS 下载链接触发浏览器下载
+    window.location.href = url;
 
-        // 3. 恢复按钮状态
-        // (如果解析成功，浏览器其实已经直接切走去下载了；如果解析失败走了降级，页面还在，这里正好恢复按钮，方便用户二次操作)
-        btn.innerHTML = defaultText;
-        btn.style.pointerEvents = 'auto';
-        btn.style.opacity = '1';
-    });
+    // 3. 延迟恢复按钮状态 (若浏览器未跳走，比如被拦截)
+    setTimeout(function () {
+      btn.innerHTML = defaultText;
+      btn.style.pointerEvents = 'auto';
+      btn.style.opacity = '1';
+    }, 3000);
+  });
 }
 
 async function checkRegionAndOptimizeDownload() {
-    try {
-        const res = await fetch('/cdn-cgi/trace');
-        const traceText = await res.text();
-        
-        const locMatch = traceText.match(/loc=([A-Z]{2})/);
-        const userCountry = locMatch ? locMatch[1] : null;
+  try {
+    var res = await fetch('/cdn-cgi/trace');
+    var traceText = await res.text();
 
-        if (userCountry === 'CN') {
-            bindDownloadButtonWithLoading(
-                'btn-win10', 
-                'Windows 8 / 10 / 11 下载', 
-                'https://wwbfa.lanzoup.com/iXlyn3kw5j9e', 
-                'df61'
-            );
+    var locMatch = traceText.match(/loc=([A-Z]{2})/);
+    var userCountry = locMatch ? locMatch[1] : null;
 
-            bindDownloadButtonWithLoading(
-                'btn-win7', 
-                'Windows 7 下载', 
-                'https://wwbfa.lanzoup.com/iK9sw3kw5jyj', 
-                'df61'
-            );
-            
-        }
-    } catch (error) {
-        console.warn("地区检测接口异常，保持默认下载源", error);
+    if (userCountry === 'CN') {
+      bindDownloadButtonWithLoading(
+        'btn-win10',
+        'Windows 8 / 10 / 11 下载',
+        ['https://cos.goover.cn/tankBox_ru/plugin/hanhuaClient/',
+          '\u5766\u514b\u4e16\u754c\u83b1\u670d\u6c49\u5316\u5b89\u88c5\u5668_2_4_signed.exe'].join('')
+      );
+
+      bindDownloadButtonWithLoading(
+        'btn-win7',
+        'Windows 7 下载',
+        ['https://cos.goover.cn/tankBox_ru/plugin/hanhuaClient/',
+          '\u5766\u514b\u4e16\u754c\u83b1\u670d\u6c49\u5316\u5b89\u88c5\u5668_2_4_signed_win7.exe'].join('')
+      );
+
     }
+  } catch (error) {
+    console.warn('地区检测接口异常，保持默认下载源', error);
+  }
 }

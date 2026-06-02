@@ -58,8 +58,6 @@
       test: latestPt ? { version: formatVersionStr(latestPt.tag_name), date: latestPt.updateDate || "" } : null
     };
 
-    debugger
-
     // 1. 渲染 guide.html (依然保留日期展示逻辑)
     var gRel = document.querySelector('[data-slot="guide-release"]');
     if (gRel && cfg.release) {
