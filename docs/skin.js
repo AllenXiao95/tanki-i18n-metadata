@@ -364,7 +364,7 @@ async function executeDownload(url, pwd, skinId, skinPreview) {
         if (!res.ok) throw new Error("解析接口返回非 200 状态");
         const data = await res.json();
 
-        if (data.code === 200 && data.downUrl) {
+        if (data.code === 200 && data.url) {
             // 解析成功后再次确认状态，防止并发误操作
             if (downloadedSkinIds.has(skinId)) {
                 hideGlobalLoading();
@@ -373,13 +373,13 @@ async function executeDownload(url, pwd, skinId, skinPreview) {
 
             if (isElectronBox) {
                 showToast(`⏳ 正在交由盒子下载安装...`, 2000);
-                window.parent.postMessage({ type: 'START_DOWNLOAD', payload: { skinId, url: data.downUrl, skinUrl: skinPreview } }, '*');
+                window.parent.postMessage({ type: 'START_DOWNLOAD', payload: { skinId, url: data.url, skinUrl: skinPreview } }, '*');
                 hideGlobalLoading();
             } else {
                 document.getElementById('globalLoadingText').innerHTML = "🚀 解析成功！即将调起下载...";
                 setTimeout(() => {
                     hideGlobalLoading();
-                    window.location.href = data.downUrl;
+                    window.location.href = data.url;
                 }, 800);
             }
         } else {
