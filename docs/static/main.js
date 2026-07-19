@@ -291,14 +291,14 @@ async function checkRegionAndOptimizeDownload() {
         'btn-win10',
         'Windows 8 / 10 / 11 下载',
         ['https://cos.goover.cn/tankBox_ru/plugin/hanhuaClient/',
-          '\u5766\u514b\u4e16\u754c\u83b1\u670d\u6c49\u5316\u5b89\u88c5\u5668_2_4_signed.exe'].join('')
+          '\u5766\u514b\u4e16\u754c\u83b1\u670d\u6c49\u5316\u5b89\u88c5\u5668_2_5_signed.exe'].join('')
       );
 
       bindDownloadButtonWithLoading(
         'btn-win7',
         'Windows 7 下载',
         ['https://cos.goover.cn/tankBox_ru/plugin/hanhuaClient/',
-          '\u5766\u514b\u4e16\u754c\u83b1\u670d\u6c49\u5316\u5b89\u88c5\u5668_2_4_signed_win7.exe'].join('')
+          '\u5766\u514b\u4e16\u754c\u83b1\u670d\u6c49\u5316\u5b89\u88c5\u5668_2_5_signed_win7.exe'].join('')
       );
 
     }
